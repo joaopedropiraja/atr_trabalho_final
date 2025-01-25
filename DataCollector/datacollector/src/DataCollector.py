@@ -12,120 +12,126 @@ from pydantic_core import from_json
 import paho.mqtt.client as mqtt
 from concurrent.futures import ThreadPoolExecutor
 
+
 class CryptoConfig(BaseModel):
-  id: uuid.UUID = uuid.uuid4()
-  symbol: str
-  interval: int = Field(default=5)
+    id: uuid.UUID = uuid.uuid4()
+    symbol: str
+    interval: int = Field(default=5)
+
 
 class COLLECTOR_TOPIC(str, Enum):
-  START = "start"
-  STOP = "stop"
+    START = "start"
+    STOP = "stop"
+
 
 class DataCollector:
-  def __init__(self, machine_id: str, broker: str, port: int, sensor_monitors_interval: int = 30) -> None:
-    self.machine_id = machine_id
-    self.broker = broker
-    self.port = port
-    self.collector_topic = "collector/#"
-    self.sensor_monitors_topic = "sensor_monitors"
-    self.sensor_monitors_interval = sensor_monitors_interval
-    self.sensors_default_topic = f"sensors/{machine_id}"
+    def __init__(
+        self,
+        machine_id: str,
+        broker: str,
+        port: int,
+        sensor_monitors_interval: int = 30,
+    ) -> None:
+        self.machine_id = machine_id
+        self.broker = broker
+        self.port = port
+        self.collector_topic = "collector/#"
+        self.sensor_monitors_topic = "sensor_monitors"
+        self.sensor_monitors_interval = sensor_monitors_interval
+        self.sensors_default_topic = f"sensors/{machine_id}"
 
-    max_workers = (os.cpu_count() or 1) * 5
-    self.thread_pool = ThreadPoolExecutor(max_workers)
-    self.thread_event_flag = threading.Event()
+        max_workers = (os.cpu_count() or 1) * 5
+        self.thread_pool = ThreadPoolExecutor(max_workers)
+        self.thread_event_flag = threading.Event()
 
-  def connect(self):
-    client = mqtt.Client()
-  
-    client.on_connect = self.__on_connect
-    client.on_message = self.__collector_topic_on_message
-    
-    client.connect(self.broker, self.port)
-    client.subscribe(self.collector_topic)
-    client.loop_forever()
-  
-  def __collector_topic_on_message(self, client: mqtt.Client, user_data: Any, message: mqtt.MQTTMessage):
-    topic = message.topic
-    sub_topic = topic.split("/")[1]
+    def connect(self):
+        client = mqtt.Client()
 
-    match sub_topic:
-      case COLLECTOR_TOPIC.START.value:
-        self.__handle_start(message)
-      case COLLECTOR_TOPIC.STOP.value:
-        self.__handler_stop()
-      case _:
-        raise ValueError(f"Invalid subtopic for topic {self.collector_topic}")
+        client.on_connect = self.__on_connect
+        client.on_message = self.__collector_topic_on_message
 
-  def __handle_start(self, message: mqtt.MQTTMessage):
-    self.thread_event_flag.clear()
-    payload = from_json(message.payload.decode(), allow_partial=True)
-    if not isinstance(payload, list):
-      raise ValueError(f"Invalid payload for the topic {self.collector_topic}")
+        client.connect(self.broker, self.port)
+        client.subscribe(self.collector_topic)
+        client.loop_forever()
 
-    configs = [CryptoConfig.model_validate(c) for c in payload]
-    self.thread_pool.submit(self.__sensors_monitor, (configs))
+    def __collector_topic_on_message(
+        self, client: mqtt.Client, user_data: Any, message: mqtt.MQTTMessage
+    ):
+        topic = message.topic
+        sub_topic = topic.split("/")[1]
 
-    for config in configs: 
-      self.thread_pool.submit(self.__sensor_worker, (config))
+        match sub_topic:
+            case COLLECTOR_TOPIC.START.value:
+                self.__handle_start(message)
+            case COLLECTOR_TOPIC.STOP.value:
+                self.__handler_stop()
+            case _:
+                raise ValueError(f"Invalid subtopic for topic {self.collector_topic}")
 
-  def __handler_stop(self):
-    self.thread_event_flag.set()
+    def __handle_start(self, message: mqtt.MQTTMessage):
+        self.thread_event_flag.clear()
+        payload = from_json(message.payload.decode(), allow_partial=True)
+        if not isinstance(payload, list):
+            raise ValueError(f"Invalid payload for the topic {self.collector_topic}")
 
-  def __sensors_monitor(self, configs: list[CryptoConfig]):
-    client = mqtt.Client()
-    client.connect(self.broker, self.port)
+        configs = [CryptoConfig.model_validate(c) for c in payload]
+        self.thread_pool.submit(self.__sensors_monitor, (configs))
 
-    sensors = [{ 
-      "sensor_id": str(c.id), 
-      "data_type": "float", 
-      "data_interval": c.interval 
-    } for c in configs]
-    message = {
-      "machine_id": self.machine_id,
-      "sensors": sensors
-    }
+        for config in configs:
+            self.thread_pool.submit(self.__sensor_worker, (config))
 
-    while not self.thread_event_flag.is_set():
-      client.publish(self.sensor_monitors_topic, json.dumps(message))
-      time.sleep(self.sensor_monitors_interval)
+    def __handler_stop(self):
+        self.thread_event_flag.set()
 
-    client.disconnect()
+    def __sensors_monitor(self, configs: list[CryptoConfig]):
+        client = mqtt.Client()
+        client.connect(self.broker, self.port)
 
-  def __sensor_worker(self, crypto_config: CryptoConfig):
-    client = mqtt.Client()
-    client.connect(self.broker, self.port)
-    topic = f"{self.sensors_default_topic}/{crypto_config.id}"
+        sensors = [
+            {"sensor_id": str(c.id), "data_type": "float", "data_interval": c.interval}
+            for c in configs
+        ]
+        message = {"machine_id": self.machine_id, "sensors": sensors}
 
-    while not self.thread_event_flag.is_set():
-      price = self.__fetch_crypto_price(crypto_config.symbol)
-      timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
-      message = {"timestamp":  timestamp, "value": price}
+        while not self.thread_event_flag.is_set():
+            client.publish(self.sensor_monitors_topic, json.dumps(message))
+            time.sleep(self.sensor_monitors_interval)
 
-      client.publish(topic, json.dumps(message))
-      time.sleep(crypto_config.interval)
+        client.disconnect()
 
-    client.disconnect()
+    def __sensor_worker(self, crypto_config: CryptoConfig):
+        client = mqtt.Client()
+        client.connect(self.broker, self.port)
+        topic = f"{self.sensors_default_topic}/{crypto_config.id}"
 
-  def __fetch_crypto_price(self, symbol: str):
-    try:
-      url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
-      response = requests.get(url)
-      
-      data = response.json()
-      price = data.get("price")
-      if price:
-        return round(float(price), 2)
-      else:
-        print(f"Error: Invalid response for {symbol}: {data}")
-        return "N/A"
-    except Exception as e:
-      print(f'Error fetching data from Binance for "{symbol}": {e}')
-      return "N/A"
+        while not self.thread_event_flag.is_set():
+            price = self.__fetch_crypto_price(crypto_config.symbol)
+            timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+            message = {"timestamp": timestamp, "value": price}
 
-  def __on_connect(self, client, userdata, flags, rc):
-    if rc == 0:
-        print("Connected to MQTT Broker!")
-    else:
-        print("Failed to connect, return code %d\n", rc)
-    
+            client.publish(topic, json.dumps(message))
+            time.sleep(crypto_config.interval)
+
+        client.disconnect()
+
+    def __fetch_crypto_price(self, symbol: str):
+        try:
+            url = f"https://api.binance.com/api/v3/ticker/price?symbol={symbol}"
+            response = requests.get(url)
+
+            data = response.json()
+            price = data.get("price")
+            if price:
+                return round(float(price), 2)
+            else:
+                print(f"Error: Invalid response for {symbol}: {data}")
+                return "N/A"
+        except Exception as e:
+            print(f'Error fetching data from Binance for "{symbol}": {e}')
+            return "N/A"
+
+    def __on_connect(self, client, userdata, flags, rc):
+        if rc == 0:
+            print("Connected to MQTT Broker!")
+        else:
+            print("Failed to connect, return code %d\n", rc)

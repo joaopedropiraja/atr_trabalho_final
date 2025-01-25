@@ -1,4 +1,6 @@
-**/mosquitto/data/mosquitto.db
+mosquitto/data
+mosquitto/log
+mongo-data
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
