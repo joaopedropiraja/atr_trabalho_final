@@ -1,0 +1,13 @@
+@environment = dev
+@route = crypto
+
+GET {{baseUrl}}/{{route}}/aaa HTTP/1.1
+
+###
+
+POST {{baseUrl}}/{{route}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "João"
+}

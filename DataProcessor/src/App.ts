@@ -1,5 +1,4 @@
 import "reflect-metadata";
-import cors from "cors";
 import helmet from "helmet";
 import morgan from "morgan";
 import { Server } from "node:http";
@@ -38,23 +37,34 @@ class App {
   private initializeMiddlewares(): void {
     this.app.use(express.urlencoded({ extended: true }));
     this.app.use(express.json());
-    this.app.use(
-      cors({ origin: "*", credentials: true, optionsSuccessStatus: 200 })
-    );
-    this.app.use(helmet());
+    // this.app.use(helmet());
 
-    if (env.NODE_ENV === "development") this.app.use(morgan("dev"));
-    else this.app.set("trust proxy", 1); // trust first proxy
+    // if (env.NODE_ENV === "development") this.app.use(morgan("dev"));
+    // else this.app.set("trust proxy", 1); // trust first proxy
   }
 
   private initializeControllers(): void {
+    const cors = {
+      origin: "*",
+      credentials: true,
+      optionsSuccessStatus: HTTP_CODES.OK,
+    };
+    const defaults = {
+      undefinedResultCode: HTTP_CODES.NO_CONTENT,
+      nullResultCode: HTTP_CODES.NOT_FOUND,
+      paramOptions: { required: true },
+    };
+
     useExpressServer(this.app, {
+      // cors,
+      // defaults,
+      routePrefix: env.BASE_ROUTE,
       controllers: [CryptoMonitorController],
     });
 
-    this.app.all("*", (req, res) => {
-      res.status(HTTP_CODES.NOT_FOUND).json({ message: "Route not found!" });
-    });
+    // this.app.use("*", (req, res) => {
+    //   res.status(HTTP_CODES.NOT_FOUND).json({ message: "Route not found!" });
+    // });
   }
 
   private setErrorHandlers(): void {}
