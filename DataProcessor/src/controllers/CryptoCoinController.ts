@@ -23,7 +23,7 @@ export class CryptoCoinController {
     @QueryParam("page") page: number = 1,
     @QueryParam("limit") limit: number = 0
   ) {
-    return this.cryptoCoinService.getPaginated(page, limit);
+    return this.cryptoCoinService.get(page, limit);
   }
 
   @Get("/:symbol")

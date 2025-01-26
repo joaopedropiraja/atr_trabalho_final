@@ -11,11 +11,12 @@ export class CryptoCoinService {
     return this.cryptoCoinRepo.getBySymbol(symbol);
   }
 
-  async getPaginated(
-    page: number,
-    limit: number
+  async get(
+    page: number = 1,
+    limit: number = 0,
+    query: object = {}
   ): Promise<{ data: ICryptoCoin[]; total: number }> {
-    return this.cryptoCoinRepo.get(page, limit);
+    return this.cryptoCoinRepo.get(page, limit, query);
   }
 
   async create(data: ICryptoCoin): Promise<ICryptoCoin> {

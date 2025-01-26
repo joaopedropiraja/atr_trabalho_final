@@ -25,3 +25,10 @@ export class UpdateCryptoDTO {
   };
   acquisitionInterval?: number;
 }
+
+export class CryptoCoinDetails {
+  constructor(
+    public readonly symbol: string,
+    public readonly interval: number
+  ) {}
+}

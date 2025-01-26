@@ -58,8 +58,8 @@ class DataCollector:
         self, client: mqtt.Client, user_data: Any, message: mqtt.MQTTMessage
     ):
         topic = message.topic
-        sub_topic = topic.split("/")[1]
 
+        sub_topic = topic.split("/")[1]
         match sub_topic:
             case COLLECTOR_TOPIC.START.value:
                 self.__handle_start(message)
@@ -73,12 +73,11 @@ class DataCollector:
         payload = from_json(message.payload.decode(), allow_partial=True)
         if not isinstance(payload, list):
             raise ValueError(f"Invalid payload for the topic {self.collector_topic}")
-
         configs = [CryptoConfig.model_validate(c) for c in payload]
         self.thread_pool.submit(self.__sensors_monitor, (configs))
 
-        for config in configs:
-            self.thread_pool.submit(self.__sensor_worker, (config))
+        for idx, config in enumerate(configs):
+            self.thread_pool.submit(self.__sensor_worker, config, idx)
 
     def __handler_stop(self):
         self.thread_event_flag.set()
@@ -92,14 +91,15 @@ class DataCollector:
             for c in configs
         ]
         message = {"machine_id": self.machine_id, "sensors": sensors}
-
         while not self.thread_event_flag.is_set():
             client.publish(self.sensor_monitors_topic, json.dumps(message))
             time.sleep(self.sensor_monitors_interval)
 
         client.disconnect()
 
-    def __sensor_worker(self, crypto_config: CryptoConfig):
+    def __sensor_worker(self, crypto_config: CryptoConfig, idx):
+        time.sleep(idx)
+
         client = mqtt.Client()
         client.connect(self.broker, self.port)
         topic = f"{self.sensors_default_topic}/{crypto_config.id}"
@@ -109,6 +109,7 @@ class DataCollector:
             timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             message = {"timestamp": timestamp, "value": price}
 
+            print(message)
             client.publish(topic, json.dumps(message))
             time.sleep(crypto_config.interval)
 
