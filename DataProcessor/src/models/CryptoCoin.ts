@@ -9,7 +9,7 @@ export class ICryptoCoin extends Document {
     small: string;
     large: string;
   };
-  acquisitionInterval!: number;
+  dataInterval!: number;
   sensorId?: string;
 }
 
@@ -22,20 +22,10 @@ const CryptoCoinSchema: Schema = new Schema<ICryptoCoin>(
       small: { type: String, required: true },
       large: { type: String, required: true },
     },
-    acquisitionInterval: { type: Number, required: true },
+    dataInterval: { type: Number, required: true },
     sensorId: { type: String },
   },
-  {
-    timestamps: true,
-    toObject: {
-      transform: (doc, ret) => {
-        ret._id = ret._id.toString();
-        delete ret._id;
-        delete ret.__v;
-        return ret;
-      },
-    },
-  }
+  { timestamps: true }
 );
 
 export const CryptoCoin = mongoose.model<ICryptoCoin>(

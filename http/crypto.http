@@ -18,7 +18,7 @@ Content-Type: application/json
     "small": "https://coin-images.coingecko.com/coins/images/1/small/bitcoin.png?1696501400",
     "large": "https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400"
   },
-  "acquisitionInterval": 5
+  "dataInterval": 5
 }
 
 ###

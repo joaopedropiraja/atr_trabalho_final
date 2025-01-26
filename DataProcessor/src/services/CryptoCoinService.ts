@@ -33,6 +33,13 @@ export class CryptoCoinService {
     return this.cryptoCoinRepo.update(id, update);
   }
 
+  async updateBySymbol(
+    symbol: string,
+    update: Partial<ICryptoCoin>
+  ): Promise<ICryptoCoin | null> {
+    return this.cryptoCoinRepo.updateBySymbol(symbol, update);
+  }
+
   async delete(id: string): Promise<void> {
     await this.cryptoCoinRepo.delete(id);
   }

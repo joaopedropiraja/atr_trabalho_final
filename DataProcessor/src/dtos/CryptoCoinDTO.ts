@@ -12,7 +12,7 @@ export class CreateCryptoDTO {
     large: string;
   };
   @IsNotEmpty()
-  acquisitionInterval!: number;
+  dataInterval!: number;
 }
 
 export class UpdateCryptoDTO {
@@ -23,12 +23,12 @@ export class UpdateCryptoDTO {
     small: string;
     large: string;
   };
-  acquisitionInterval?: number;
+  dataInterval?: number;
 }
 
 export class CryptoCoinDetails {
   constructor(
-    public readonly symbol: string,
-    public readonly interval: number
+    public readonly code: string,
+    public readonly dataInterval: number
   ) {}
 }

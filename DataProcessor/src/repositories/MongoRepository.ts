@@ -1,7 +1,7 @@
 import { Model, Document } from "mongoose";
 
 export class MongoRepository<T extends Document> {
-  private model: Model<T>;
+  protected model: Model<T>;
 
   constructor(model: Model<T>) {
     this.model = model;

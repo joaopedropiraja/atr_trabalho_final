@@ -9,24 +9,23 @@ export class MonitorController {
 
   @Post("/start")
   async startCollector() {
-    const isCollectorAlreadyActive = await this.monitorService.startCollector();
+    const wasStartSucceed = await this.monitorService.startCollector();
 
     return {
-      message: isCollectorAlreadyActive
-        ? "Collector already active."
-        : "Collector started.",
+      message: wasStartSucceed
+        ? "Collector started."
+        : "Collector already active.",
     };
   }
 
   @Post("/stop")
   async stopCollector() {
-    const isCollectorAlreadyInactive =
-      await this.monitorService.stopCollector();
+    const wasStopSucceed = await this.monitorService.stopCollector();
 
     return {
-      message: isCollectorAlreadyInactive
-        ? "Collector already inactive."
-        : "Collector stopped.",
+      message: wasStopSucceed
+        ? "Collector stopped."
+        : "Collector already inactive.",
     };
   }
 }
