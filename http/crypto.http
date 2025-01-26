@@ -1,13 +1,38 @@
 @environment = dev
-@route = crypto
+@route = crypto-coins
 
-GET {{baseUrl}}/{{route}}/aaa HTTP/1.1
+# @name getCryptoCoins
+GET {{baseUrl}}/{{route}} HTTP/1.1
 
 ###
 
+# @name createCryptoCoin
 POST {{baseUrl}}/{{route}} HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "João"
+  "name": "Bitcoin",
+  "symbol": "BTC",
+  "image": {
+    "thumb": "https://coin-images.coingecko.com/coins/images/1/thumb/bitcoin.png?1696501400",
+    "small": "https://coin-images.coingecko.com/coins/images/1/small/bitcoin.png?1696501400",
+    "large": "https://coin-images.coingecko.com/coins/images/1/large/bitcoin.png?1696501400"
+  },
+  "acquisitionInterval": 5
 }
+
+###
+
+# @name updateCryptoCoin
+PUT {{baseUrl}}/{{route}}/{{createCryptoCoin.response.body._id}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "name": "Ethereum"
+}
+
+
+###
+
+# @name deleteCryptoCoin
+DELETE {{baseUrl}}/{{route}}/{{createCryptoCoin.response.body._id}} HTTP/1.1

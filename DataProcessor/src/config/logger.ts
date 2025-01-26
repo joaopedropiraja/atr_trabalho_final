@@ -1,11 +1,9 @@
 import pino from "pino";
 import pretty from "pino-pretty";
-import fileDirName from "./fileDirName.js";
-import { env } from "./envSchema.js";
+import { env } from "./envSchema";
 
 const IS_DEV_ENV = env.NODE_ENV === "development";
 
-const { __dirname } = fileDirName(import.meta.url);
 const destination = IS_DEV_ENV
   ? pretty({
       levelFirst: true,

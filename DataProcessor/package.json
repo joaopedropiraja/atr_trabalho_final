@@ -3,13 +3,11 @@
   "version": "1.0.0",
   "main": "src/index.ts",
   "scripts": {
-    "dev": "npx tsx --env-file=.env --watch src/index.ts",
-    "start": "npx tsc src/index.ts"
+    "dev": "npx nodemon -e ts --exec \"npx ts-node src/index.ts\""
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "type": "module",
   "description": "",
   "devDependencies": {
     "@types/express": "^5.0.0",
@@ -17,19 +15,25 @@
     "@types/mongoose": "^5.11.96",
     "@types/morgan": "^1.9.9",
     "@types/mqtt": "^0.0.34",
+    "@types/node": "^22.10.10",
     "@types/pino": "^7.0.4",
     "@types/pino-pretty": "^4.7.5",
-    "tsx": "^4.19.2",
+    "nodemon": "^3.1.9",
+    "ts-node": "^10.9.2",
     "typescript": "^5.7.3"
   },
   "dependencies": {
+    "@types/multer": "^1.4.12",
     "class-validator": "^0.14.1",
+    "concurrently": "^9.1.2",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
     "express": "^4.21.2",
     "helmet": "^8.0.0",
     "mongoose": "^8.9.5",
     "morgan": "^1.10.0",
     "mqtt": "^5.10.3",
+    "multer": "^1.4.5-lts.1",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
     "routing-controllers": "^0.10.4",

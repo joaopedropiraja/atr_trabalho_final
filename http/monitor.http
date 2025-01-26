@@ -1,0 +1,11 @@
+@environment = dev
+@route = monitor
+
+# @name startCollector
+POST {{baseUrl}}/{{route}}/start HTTP/1.1
+
+###
+
+# @name stopCollector
+POST {{baseUrl}}/{{route}}/stop HTTP/1.1
+
