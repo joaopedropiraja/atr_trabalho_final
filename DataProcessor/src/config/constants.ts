@@ -20,6 +20,7 @@ export enum EXIT_STATUS {
 export enum COLLECTION_NAMES {
   USER = "users",
   CRYPTO_COIN = "cryptocoins",
+  CRYPTO_COIN_PRICE = "cryptocoinprices",
 }
 
 export const IMAGE_CONFIG = {

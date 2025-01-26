@@ -6,6 +6,10 @@ import { CryptoCoinDetails } from "../dtos/CryptoCoinDTO";
 import { MqttClientService } from "./MqttClientService";
 import logger from "../config/logger";
 import { ICryptoCoin } from "../models/CryptoCoin";
+import { CryptoCoinPriceService } from "./CryptoCoinPriceService";
+import { Types } from "mongoose";
+import { CryptoCoinPrice } from "../models/CryptoCoinPrice";
+import { secondsToMilliSeconds } from "../utils/secondsToMilliseconds";
 
 enum TOPICS {
   COLLECTOR_START = "collector/start",
@@ -13,7 +17,7 @@ enum TOPICS {
   SENSOR_MONITORS = "sensor_monitors",
   DEFAULT_SENSORS = "sensors",
 }
-const secondsToMilliSeconds = (seconds: number) => seconds * 1000;
+
 type CryptoCoinMap = {
   [key: string]: { cryptoCoin: ICryptoCoin; interval: NodeJS.Timeout | null };
 };
@@ -30,6 +34,11 @@ class Machine {
   sensors!: Sensor[];
 }
 
+class SensorData {
+  value!: number;
+  timestamp!: Date;
+}
+
 @Service()
 export class MonitorService {
   private intervalMultiplier: number = 5;
@@ -42,6 +51,7 @@ export class MonitorService {
 
   constructor(
     private readonly cryptoCoinService: CryptoCoinService,
+    private readonly cryptoCoinPriceService: CryptoCoinPriceService,
     private readonly mqttClientService: MqttClientService
   ) {}
 
@@ -134,7 +144,7 @@ export class MonitorService {
     };
   }
 
-  private sensorsOnMessage(
+  private async sensorsOnMessage(
     topic: string,
     payload: Buffer,
     packet: IPublishPacket
@@ -147,12 +157,44 @@ export class MonitorService {
 
     this.updateCryptoCoinsMapInterval(sensorId);
 
-    console.log(`Sensor ID "${sensorId}": ${payload.toString()}`);
+    const cryptoCoinId = new Types.ObjectId(
+      String(this.cryptoCoinsMap?.[sensorId]?.cryptoCoin?._id)
+    );
+    if (cryptoCoinId == null || !(cryptoCoinId instanceof Types.ObjectId)) {
+      logger.warn(`Invalid crypto coin ID for sensor "${sensorId}".`);
+
+      return;
+    }
+
+    const lastCryptoCoinPrice = await this.saveNewCryptoCoinPrice(
+      cryptoCoinId,
+      payload
+    );
+    const metrics = await this.cryptoCoinPriceService.getMetrics(cryptoCoinId);
+
+    // sendToMqtt
+  }
+
+  private async saveNewCryptoCoinPrice(
+    cryptoCoinId: Types.ObjectId,
+    payload: Buffer
+  ) {
+    const payloadObj = JSON.parse(payload.toString());
+    const sensorData = plainToClass(SensorData, payloadObj);
+
+    const cryptoCoinPrice = new CryptoCoinPrice({
+      cryptoCoin: cryptoCoinId,
+      value: sensorData.value,
+      timestamp: sensorData.timestamp,
+    });
+    return this.cryptoCoinPriceService.create(cryptoCoinPrice);
   }
 
   private updateCryptoCoinsMapInterval(sensorId: string) {
-    if (this.cryptoCoinsMap?.[sensorId] == null) return;
-
+    if (this.cryptoCoinsMap?.[sensorId] == null) {
+      logger.warn(`Sensor ID "${sensorId}" not found in Map.`);
+      return;
+    }
     const { cryptoCoin } = this.cryptoCoinsMap[sensorId];
 
     if (this.cryptoCoinsMap[sensorId].interval) {
