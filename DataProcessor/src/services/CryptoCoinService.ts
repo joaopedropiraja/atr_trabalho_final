@@ -19,6 +19,10 @@ export class CryptoCoinService {
     return this.cryptoCoinRepo.get(page, limit, query);
   }
 
+  async getWithPrices(pricesPage: number = 1, pricesLimit: number = 0) {
+    return this.cryptoCoinRepo.getWithPrices(pricesPage, pricesLimit);
+  }
+
   async create(data: ICryptoCoin): Promise<ICryptoCoin> {
     const foundCoin = await this.cryptoCoinRepo.getBySymbol(data.symbol);
     if (!!foundCoin) throw new ConflictError("Duplicate symbol.");

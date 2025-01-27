@@ -26,6 +26,14 @@ export class CryptoCoinController {
     return this.cryptoCoinService.get(page, limit);
   }
 
+  @Get("/with-prices")
+  async getCryptoWithPrices(
+    @QueryParam("pricesPage") pricesPage: number = 1,
+    @QueryParam("pricesLimit") pricesLimit: number = 0
+  ) {
+    return this.cryptoCoinService.getWithPrices(pricesPage, pricesLimit);
+  }
+
   @Get("/:symbol")
   async getCryptoBySymbol(@Param("symbol") symbol: string) {
     return this.cryptoCoinService.getBySymbol(symbol);
