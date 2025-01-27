@@ -8,10 +8,12 @@ import {
   QueryParam,
   Delete,
   Put,
+  HttpCode,
 } from "routing-controllers";
 import { CreateCryptoDTO, UpdateCryptoDTO } from "../dtos/CryptoCoinDTO";
 import { CryptoCoin } from "../models/CryptoCoin";
 import { CryptoCoinService } from "../services/CryptoCoinService";
+import { HTTP_CODES } from "../config/constants";
 
 @JsonController("/crypto-coins", { transformResponse: false })
 @Service()
@@ -40,9 +42,9 @@ export class CryptoCoinController {
   }
 
   @Post("/")
+  @HttpCode(HTTP_CODES.CREATED)
   async createCrypto(@Body() data: CreateCryptoDTO) {
     const coin = new CryptoCoin(data);
-
     return this.cryptoCoinService.create(coin);
   }
 

@@ -19,6 +19,7 @@ export enum EXIT_STATUS {
 
 export enum COLLECTION_NAMES {
   USER = "users",
+  ALERT = "alerts",
   CRYPTO_COIN = "cryptocoins",
   CRYPTO_COIN_PRICE = "cryptocoinprices",
 }
