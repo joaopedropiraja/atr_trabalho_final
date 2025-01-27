@@ -1,23 +1,24 @@
-import { StyleSheet } from 'react-native';
+import { StyleSheet } from "react-native";
 
 const styles = StyleSheet.create({
   itemWrapper: {
     paddingHorizontal: 16,
     marginTop: 24,
+    display: "flex",
     flexDirection: "row",
     justifyContent: "space-between",
-    alignItems: 'center',
+    alignItems: "center",
   },
   leftWrapper: {
     flexDirection: "row",
-    alignItems: 'center',
+    alignItems: "center",
   },
   image: {
     height: 48,
     width: 48,
   },
-  rightWrapper:{
-    alignItems: 'flex-end',
+  rightWrapper: {
+    alignItems: "flex-end",
   },
   titleWrapper: {
     marginLeft: 8,
@@ -30,7 +31,6 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: "#A9ABB1",
   },
-
 });
 
 export default styles;
