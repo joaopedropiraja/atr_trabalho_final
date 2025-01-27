@@ -7,7 +7,7 @@ GET {{baseUrl}}/{{route}} HTTP/1.1
 ###
 
 # @name getCryptoCoinsWithPrices
-GET {{baseUrl}}/{{route}}/with-prices?pricesLimit=2 HTTP/1.1
+GET {{baseUrl}}/{{route}}/with-prices?pricesLimit=5 HTTP/1.1
 
 ###
 

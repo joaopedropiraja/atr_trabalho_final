@@ -10,6 +10,7 @@ import mqtt, {
   OnMessageCallback,
 } from "mqtt";
 import { env } from "../config/envSchema";
+import logger from "../config/logger";
 
 @Service()
 export class MqttClientService {
@@ -83,7 +84,8 @@ export class MqttClientService {
     subOptions: IClientSubscribeOptions | IClientSubscribeProperties = {}
   ): Promise<void> {
     if (!this.client) {
-      throw new Error("MQTT client is not connected. Call 'connect()' first.");
+      logger.error("MQTT client is not connected. Call 'connect()' first.");
+      return;
     }
 
     // If this is the first time we're subscribing to this topic, actually subscribe via the client.

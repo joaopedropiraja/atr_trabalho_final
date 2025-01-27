@@ -18,9 +18,10 @@ export class CryptoCoinPriceService {
     const now = new Date();
 
     const timeRanges = [
-      { label: "hour", startTime: subHours(now, 1) },
-      { label: "day", startTime: subDays(now, 1) },
-      { label: "week", startTime: subDays(now, 7) },
+      { label: "1h", startTime: subHours(now, 1) },
+      { label: "10h", startTime: subHours(now, 10) },
+      { label: "1d", startTime: subDays(now, 1) },
+      { label: "7d", startTime: subDays(now, 7) },
     ];
     const results = await Promise.all(
       timeRanges.map(({ label, startTime }) =>
@@ -32,12 +33,10 @@ export class CryptoCoinPriceService {
       )
     );
 
-    return results.reduce(
-      (acc, { label, metrics }) => ({
-        ...acc,
-        [label]: metrics,
-      }),
-      {}
-    );
+    return results.map(({ label, metrics }) => ({
+      label,
+      movingAverage: metrics.movingAverage,
+      percentageChange: metrics.percentageChange,
+    }));
   }
 }
