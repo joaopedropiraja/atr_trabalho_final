@@ -2,7 +2,8 @@ import React from "react";
 import { View, Text, Image, Dimensions } from "react-native";
 import { StyleSheet } from "react-native";
 import { toMonetaryFormat } from "../utils/toMonetaryFormat";
-
+import { LineChart } from 'react-native-svg-charts';
+import { G, Line, Text as SvgText } from 'react-native-svg';
 
 //export const { width: SIZE } = Dimensions.get("window");
 const Chart = ({
@@ -18,6 +19,39 @@ const Chart = ({
   const priceChangeColor = priceChange7d > 0 ? "#34C759" : "#FF3830";
   const movingAverageChangeColor = movingAverage > 0 ? "#34C759" : "#FF3830";
   const percentageChangeColor = percentageChange > 0 ? "#34C759" : "#FF3830";
+  
+  const SparklineChart = ({ data }) => {
+    // Extraindo os valores de y e x
+    const values = data.map(item => item.y);
+    const xValues = data.map(item => item.x);
+  
+    return (
+      <LineChart
+        style={{ height: 200, width: 300 }}
+        data={values}
+        svg={{ stroke: 'rgb(134, 65, 244)', strokeWidth: 2 }}
+        contentInset={{ top: 20, bottom: 20 }}
+      >
+        <G>
+          {/* Eixo X customizado */}
+          {xValues.map((x, index) => (
+            <SvgText
+              key={index}
+              x={index * 60} // Define a posição X no gráfico
+              y={210} // Ajuste de altura
+              fontSize={10}
+              fill="black"
+              textAnchor="middle"
+            >
+              {x}
+            </SvgText>
+          ))}
+        </G>
+      </LineChart>
+    );
+  };
+  
+  
   return (
     //<ChartPathProvider data = {{points: sparkline_in_7d, smoothingStrategy: 'bezier'}}>
     <View style={styles.chartWrapper}>
@@ -55,6 +89,9 @@ const Chart = ({
             {percentageChange.toFixed(2)} %
           </Text>
         </View>
+      </View>
+      <View>
+        <SparklineChart data={sparkline_in_7d} />
       </View>
     </View>
 

@@ -4,7 +4,11 @@ import Chart from '../../components/Chart';
 
 export default function CryptoInformation({route}) {
 const  cryptoData  = route.params.paramKey;
-
+const transformPrices = cryptoData.prices.map(price => ({
+    x: new Date(price.timestamp).getTime(), 
+    y: price.value                          
+  }));
+console.log(transformPrices)
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Crypto Information</Text>
@@ -18,7 +22,7 @@ const  cryptoData  = route.params.paramKey;
             priceChange7d = {cryptoData.metrics[2].percentageChange}
             movingAverage = {cryptoData.metrics[2].movingAverage}
             percentageChange = {cryptoData.metrics[2].percentageChange}
-            //sparkline_in_7d = {0}
+            sparkline_in_7d = {transformPrices}
         />
       }
     </View>
