@@ -10,13 +10,15 @@ const  cryptoData  = route.params.paramKey;
       <Text style={styles.title}>Crypto Information</Text>
       {
         <Chart
-            key={cryptoData.id}
-            currentPrice = {cryptoData.currentPrice}
+            key={cryptoData._id}
+            currentPrice = {cryptoData.prices[cryptoData.prices.length - 1].value}
             symbol = {cryptoData.symbol}
-            logoUrl = {cryptoData.logoUrl}
+            logoUrl = {cryptoData.image.small}
             name = {cryptoData.name}
-            priceChange7d = {cryptoData.priceChange7d}
-            sparkline_in_7d = {cryptoData.sparkline_in_7d}
+            priceChange7d = {cryptoData.metrics[2].percentageChange}
+            movingAverage = {cryptoData.metrics[2].movingAverage}
+            percentageChange = {cryptoData.metrics[2].percentageChange}
+            //sparkline_in_7d = {0}
         />
       }
     </View>

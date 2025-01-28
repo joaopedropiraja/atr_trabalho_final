@@ -1,9 +1,10 @@
 import React from "react";
 import { View, Text, Image, Dimensions } from "react-native";
 import { StyleSheet } from "react-native";
-//import {ChartDot, ChartPath, ChartPathProvider} from '@rainbow-me/animated-charts';
+import { toMonetaryFormat } from "../utils/toMonetaryFormat";
 
-export const { width: SIZE } = Dimensions.get("window");
+
+//export const { width: SIZE } = Dimensions.get("window");
 const Chart = ({
   currentPrice,
   logoUrl,
@@ -11,8 +12,12 @@ const Chart = ({
   symbol,
   priceChange7d,
   sparkline_in_7d,
+  movingAverage,
+  percentageChange
 }) => {
   const priceChangeColor = priceChange7d > 0 ? "#34C759" : "#FF3830";
+  const movingAverageChangeColor = movingAverage > 0 ? "#34C759" : "#FF3830";
+  const percentageChangeColor = percentageChange > 0 ? "#34C759" : "#FF3830";
   return (
     //<ChartPathProvider data = {{points: sparkline_in_7d, smoothingStrategy: 'bezier'}}>
     <View style={styles.chartWrapper}>
@@ -24,21 +29,35 @@ const Chart = ({
               {name} ({symbol.toUpperCase()})
             </Text>
           </View>
-          <Text style={styles.subtitle}>7d</Text>
+          <Text style={styles.subtitle}>1d</Text>
         </View>
         <View style={styles.lowerTitles}>
           <Text style={styles.boldTitle}>
-            ${currentPrice.toLocaleString("en-US", { currency: "USD" })}
+            {toMonetaryFormat(currentPrice)}
           </Text>
           <Text style={[styles.subtitle, { color: priceChangeColor }]}>
             {priceChange7d.toFixed(2)}%
           </Text>
         </View>
+        <View style={styles.lowerTitles}>
+          <Text style={styles.subtitle}>
+            Média móvel: 
+          </Text>
+          <Text style={[styles.subtitle, { color: movingAverageChangeColor }]}>
+            {toMonetaryFormat(movingAverage)}
+          </Text>
+        </View>
+        <View style={styles.lowerTitles}>
+          <Text style={styles.subtitle}>
+            Porcentagem: 
+          </Text>
+          <Text style={[styles.subtitle, { color: percentageChangeColor }]}>
+            {percentageChange.toFixed(2)} %
+          </Text>
+        </View>
       </View>
-      {/* <ChartPath height = {SIZE / 2} stroke="black" width = {SIZE}/>
-                <ChartDot style = {{backgroundColor: 'blue'}}/> */}
     </View>
-    //</ChartPathProvider>
+
   );
 };
 
