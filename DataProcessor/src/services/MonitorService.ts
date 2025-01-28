@@ -8,7 +8,7 @@ import logger from "../config/logger";
 import { ICryptoCoin } from "../models/CryptoCoin";
 import { CryptoCoinPriceService } from "./CryptoCoinPriceService";
 import { Types } from "mongoose";
-import { CryptoCoinPrice } from "../models/CryptoCoinPrice";
+import { CryptoCoinPrice, ICryptoCoinPrice } from "../models/CryptoCoinPrice";
 import { secondsToMilliSeconds } from "../utils/secondsToMilliseconds";
 
 enum TOPICS {
@@ -16,6 +16,7 @@ enum TOPICS {
   COLLECTOR_STOP = "collector/stop",
   SENSOR_MONITORS = "sensor_monitors",
   DEFAULT_SENSORS = "sensors",
+  PROCESSED_DATA = "processed-data",
 }
 
 type CryptoCoinMap = Record<
@@ -169,10 +170,14 @@ export class MonitorService {
 
     // Publish metrics
     await this.mqttClientService.publish(
-      `processed-data/${cryptoCoinId.toString()}`,
+      `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`,
       JSON.stringify({ lastCryptoCoinPrice, metrics })
     );
+
+    await this.sendAlerts(lastCryptoCoinPrice);
   }
+
+  private async sendAlerts(lastCryptoCoinPrice: ICryptoCoinPrice) {}
 
   /**
    * Map the sensors to the crypto coins in the database (updating their sensorId field).

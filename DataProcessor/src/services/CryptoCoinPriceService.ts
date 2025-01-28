@@ -25,7 +25,7 @@ export class CryptoCoinPriceService {
     ];
     const results = await Promise.all(
       timeRanges.map(({ label, startTime }) =>
-        this.cryptoCoinPriceRepo.calculateMetricsForRange(
+        this.cryptoCoinPriceRepo.calculateMetrics(
           cryptoCoinId,
           label,
           startTime
