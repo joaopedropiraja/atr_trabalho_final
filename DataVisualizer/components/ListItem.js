@@ -21,7 +21,7 @@ const ListItem = ({
           <Image source={{ uri: logoUrl }} style={styles.image}></Image>
           <View style={styles.titleWrapper}>
             <Text style={styles.title}> {name} </Text>
-            <Text style={styles.subtitle}> {symbol.toUpperCase()} </Text>
+            <Text style={styles.subtitle}> {symbol} </Text>
           </View>
         </View>
 

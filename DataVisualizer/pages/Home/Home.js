@@ -5,19 +5,16 @@ import { useNavigation } from "@react-navigation/native";
 import ListItem from "../../components/ListItem";
 import styles from "./Styles";
 import { SAMPLE_DATA } from "../../assets/data/sampleData";
-import { FlatList } from "react-native-web";
 
 export default function Home() {
+
   const navigation = useNavigation();
 
-  //const [selectedCryptoData, setSelectedCryptoData] = useState(null)
-
   const handleItemPress = (object) => {
-    //setSelectedCryptoData(object)
-    //console.log(object)
     navigation.navigate("CryptoInformation", { paramKey: object }); // Navega para a tela CryptoInformation
   };
 
+  console.log(SAMPLE_DATA[0].prices[SAMPLE_DATA[0].prices.length - 1].value)
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.body}>
@@ -27,12 +24,12 @@ export default function Home() {
         <View style={styles.dividerLine} />
         {SAMPLE_DATA.map((object) => (
           <ListItem
-            key={object.id}
+            key={object._id}
             name={object.name}
             symbol={object.symbol}
-            currentPrice={object.currentPrice}
-            priceChange7d={object.priceChange7d}
-            logoUrl={object.logoUrl}
+            currentPrice={object.prices[object.prices.length - 1].value}
+            priceChange7d={object.metrics[2].percentageChange}
+            logoUrl={object.image.small}
             onPress={() => handleItemPress(object)}
           />
         ))}
