@@ -1,17 +1,32 @@
-import { StatusBar } from "expo-status-bar";
-import React, { Component } from "react";
-import { ScrollView, StyleSheet, Text, View } from "react-native";
+import React, { useEffect, useState } from "react";
+import { ScrollView, Text, View } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import axios from "axios";
+
 import ListItem from "../../components/ListItem";
 import styles from "./Styles";
-import { SAMPLE_DATA } from "../../assets/data/sampleData";
 
 export default function Home() {
-
   const navigation = useNavigation();
+  const [cryptos, setCryptos] = useState([]);
 
-  const handleItemPress = (object) => {
-    navigation.navigate("CryptoInformation", { paramKey: object }); // Navega para a tela CryptoInformation
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const response = await axios.get(
+          "http://localhost:3000/api/v1/crypto-coins/with-prices"
+        );
+        setCryptos(response.data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
+    fetchData();
+  }, []);
+
+  const handleItemPress = (cryptoCoin) => {
+    navigation.navigate("CryptoInformation", { paramKey: cryptoCoin });
   };
 
   return (
@@ -20,18 +35,31 @@ export default function Home() {
         <View style={styles.titleWrapper}>
           <Text style={styles.largeTitle}>Crypto Monitor</Text>
         </View>
+
         <View style={styles.dividerLine} />
-        {SAMPLE_DATA.map((object) => (
-          <ListItem
-            key={object._id}
-            name={object.name}
-            symbol={object.symbol}
-            currentPrice={object.prices[object.prices.length - 1].value}
-            priceChange7d={object.metrics[2].percentageChange}
-            logoUrl={object.image.small}
-            onPress={() => handleItemPress(object)}
-          />
-        ))}
+
+        {cryptos.map((cryptoCoin) => {
+          const lastPriceIndex = cryptoCoin.prices?.length - 1;
+          const currentPrice =
+            lastPriceIndex >= 0 ? cryptoCoin.prices[lastPriceIndex].value : 0;
+
+          const METRIC_LABEL = "1d";
+          const percentageChangeLastHour =
+            cryptoCoin.metrics?.find(({ label }) => label === METRIC_LABEL)
+              ?.percentageChange || 0;
+
+          return (
+            <ListItem
+              key={cryptoCoin._id}
+              name={cryptoCoin.name}
+              symbol={cryptoCoin.symbol}
+              currentPrice={currentPrice}
+              percentageChangeLastHour={percentageChangeLastHour}
+              logoUrl={cryptoCoin.image?.small}
+              onPress={() => handleItemPress(cryptoCoin)}
+            />
+          );
+        })}
       </View>
     </ScrollView>
   );
