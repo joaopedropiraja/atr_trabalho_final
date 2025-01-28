@@ -11,6 +11,7 @@ export class IAlert extends Document {
   cryptoCoin!: Types.ObjectId;
   type!: AlertType;
   value!: number;
+  isActive!: boolean;
 }
 
 const AlertSchema: Schema = new Schema<IAlert>(
@@ -27,6 +28,7 @@ const AlertSchema: Schema = new Schema<IAlert>(
     },
     type: { type: String, required: true, enum: Object.values(AlertType) },
     value: { type: Number, required: true },
+    isActive: { type: Boolean, required: true, default: true },
   },
   { timestamps: true }
 );

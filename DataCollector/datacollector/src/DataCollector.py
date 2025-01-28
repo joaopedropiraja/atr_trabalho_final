@@ -12,17 +12,14 @@ from pydantic_core import from_json
 import paho.mqtt.client as mqtt
 from concurrent.futures import ThreadPoolExecutor
 
-
 class SensorConfig(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     code: str
     data_interval: int = Field(default=5)
 
-
 class COLLECTOR_TOPIC(str, Enum):
     START = "start"
     STOP = "stop"
-
 
 class DataCollector:
     def __init__(
@@ -43,7 +40,7 @@ class DataCollector:
         max_workers = (os.cpu_count() or 1) * 5
         self.thread_pool = ThreadPoolExecutor(max_workers)
         self.thread_event_flag = threading.Event()
-        
+
         self.invalid_price = "N/A"
 
     def connect(self):
@@ -62,7 +59,7 @@ class DataCollector:
         splitted_topic = message.topic.split("/")
         if len(splitted_topic) != 2:
             return
-    
+
         sub_topic = splitted_topic[1]
         match sub_topic:
             case COLLECTOR_TOPIC.START.value:
@@ -76,12 +73,12 @@ class DataCollector:
         if self.thread_event_flag.is_set():
             return
         self.thread_event_flag.set()
-        
+
         payload = from_json(message.payload.decode(), allow_partial=True)
         if not isinstance(payload, list):
             print(f"Invalid payload for the topic {self.collector_topic}")
             return
-        
+
         configs = [SensorConfig.model_validate(c) for c in payload]
         self.thread_pool.submit(self.__sensors_monitor, (configs))
 
@@ -108,7 +105,7 @@ class DataCollector:
             for c in configs
         ]
         message = {"machine_id": self.machine_id, "sensors": sensors}
-        print(message)
+
         while self.thread_event_flag.is_set():
             client.publish(self.sensor_monitors_topic, json.dumps(message))
             time.sleep(self.sensor_monitors_interval)

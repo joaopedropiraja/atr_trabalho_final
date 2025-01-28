@@ -1,10 +1,14 @@
 import { Service } from "typedi";
 import { IUser } from "../models/User";
 import { UserRepository } from "../repositories/UserRepository";
+import { HashService } from "./HashService";
 
 @Service()
 export class UserService {
-  constructor(private readonly userRepository: UserRepository) {}
+  constructor(
+    private readonly userRepository: UserRepository,
+    private readonly hashService: HashService
+  ) {}
 
   async get(
     page: number = 1,
@@ -35,8 +39,10 @@ export class UserService {
     return user;
   }
 
-  async create(data: IUser): Promise<IUser> {
-    const createdUser = await this.userRepository.create(data);
+  async create(user: IUser): Promise<IUser> {
+    user.password = await this.hashService.hashPassword(user?.password || "");
+
+    const createdUser = await this.userRepository.create(user);
     createdUser.password = undefined;
 
     return createdUser;

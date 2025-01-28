@@ -9,7 +9,7 @@ export class CryptoCoinPriceRepository extends MongoRepository<ICryptoCoinPrice>
     super(CryptoCoinPrice);
   }
 
-  async calculateMetricsForRange(
+  async calculateMetrics(
     cryptoCoinId: Types.ObjectId,
     label: string,
     startTime: Date
