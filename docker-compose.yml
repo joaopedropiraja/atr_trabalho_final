@@ -15,18 +15,15 @@ services:
     command: /init-replica.sh
     restart: always
 
-  # Eclipse Mosquitto MQTT Broker
   mosquitto:
     image: eclipse-mosquitto:2
     container_name: mosquitto
     restart: always
 
-    # Expose both ports on your host
     ports:
       - "1883:1883" # Raw MQTT
       - "9001:9001" # WebSockets
 
-    # Mount your local config, data, and logs
     volumes:
       - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./mosquitto/data:/mosquitto/data

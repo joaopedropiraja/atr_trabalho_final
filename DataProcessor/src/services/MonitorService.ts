@@ -10,6 +10,7 @@ import { CryptoCoinPriceService } from "./CryptoCoinPriceService";
 import { Types } from "mongoose";
 import { CryptoCoinPrice, ICryptoCoinPrice } from "../models/CryptoCoinPrice";
 import { secondsToMilliSeconds } from "../utils/secondsToMilliseconds";
+import { WebSocketService } from "./WebScoketService";
 
 enum TOPICS {
   COLLECTOR_START = "collector/start",
@@ -53,7 +54,8 @@ export class MonitorService {
   constructor(
     private readonly cryptoCoinService: CryptoCoinService,
     private readonly cryptoCoinPriceService: CryptoCoinPriceService,
-    private readonly mqttClientService: MqttClientService
+    private readonly mqttClientService: MqttClientService,
+    private readonly webSocketService: WebSocketService
   ) {}
 
   async startCollector(): Promise<boolean> {
@@ -142,6 +144,10 @@ export class MonitorService {
 
     const metrics = await this.cryptoCoinPriceService.getMetrics(cryptoCoinId);
 
+    this.webSocketService.broadcast(
+      `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`,
+      JSON.stringify({ lastCryptoCoinPrice, metrics })
+    );
     await this.mqttClientService.publish(
       `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`,
       JSON.stringify({ lastCryptoCoinPrice, metrics })

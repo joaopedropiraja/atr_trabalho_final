@@ -14,7 +14,7 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:3000/api/v1/crypto-coins/with-prices"
+          "http://192.168.0.14:3000/api/v1/crypto-coins/with-prices"
         );
         setCryptos(response.data);
       } catch (err) {
@@ -51,6 +51,7 @@ export default function Home() {
           return (
             <ListItem
               key={cryptoCoin._id}
+              cryptoId={cryptoCoin._id}
               name={cryptoCoin.name}
               symbol={cryptoCoin.symbol}
               currentPrice={currentPrice}

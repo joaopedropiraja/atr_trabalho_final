@@ -2,21 +2,25 @@ import "reflect-metadata";
 import "dotenv/config";
 import helmet from "helmet";
 import morgan from "morgan";
-import { Server } from "node:http";
+import { createServer, Server as HttpServer } from "http";
 import express, { Application } from "express";
+import { Server as SocketIOServer } from "socket.io";
 import { useContainer, useExpressServer } from "routing-controllers";
 import { env } from "./config/envSchema";
 import logger from "./config/logger";
 import { MongoConfig } from "./config/MongoConfig";
 import { EXIT_STATUS, HTTP_CODES } from "./config/constants";
 import Container from "typedi";
+import { WebSocketService } from "./services/WebScoketService";
 
 const IS_DEV_ENV = env.NODE_ENV === "development";
 
 class App {
   public app: Application;
   private mongoConfig: MongoConfig;
-  private server?: Server;
+
+  private server?: HttpServer;
+  private io?: SocketIOServer;
 
   constructor() {
     this.app = express();
@@ -29,7 +33,27 @@ class App {
   public async start(): Promise<void> {
     await this.startServices();
 
-    this.server = this.app.listen(env.PORT, () => {
+    this.server = createServer(this.app);
+    this.io = new SocketIOServer(this.server, {
+      cors: {
+        origin: "*",
+        methods: ["GET", "POST"],
+      },
+    });
+
+    const webSocketService = Container.get(WebSocketService);
+
+    webSocketService.init(this.io);
+
+    this.io.on("connection", (socket) => {
+      logger.info(`Socket connected: ${socket.id}`);
+
+      socket.on("disconnect", () => {
+        logger.info(`Socket disconnected: ${socket.id}`);
+      });
+    });
+
+    this.server.listen(env.PORT, () => {
       logger.info(`✅ Server running on http://localhost:${env.PORT}`);
     });
 
@@ -93,6 +117,7 @@ class App {
       process.on(signal, () => {
         this.server?.close(async () => {
           try {
+            await this.io?.close();
             await this.stopServices();
             logger.info("App exited with success");
             process.exit(EXIT_STATUS.SUCCESS);

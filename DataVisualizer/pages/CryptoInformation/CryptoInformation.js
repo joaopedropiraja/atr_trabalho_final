@@ -9,13 +9,17 @@ export default function CryptoInformation({ route }) {
   const navigation = useNavigation();
 
   const handleItemPress = (object) => {
-    navigation.navigate("CryptoAlert", { paramKey: object }); // Navega para a tela CryptoInformation
+    navigation.navigate("CryptoAlert", { paramKey: object }); // Navigate to CryptoAlert screen
   };
 
   const transformPrices = cryptoData.prices.map((price) => ({
     x: new Date(price.timestamp).getTime(),
     y: price.value,
   }));
+  const METRIC_LABEL = "1h";
+  const oneHourMetric = cryptoData.metrics?.find(
+    ({ label }) => label === METRIC_LABEL
+  );
 
   return (
     <View style={styles.container}>
@@ -23,14 +27,16 @@ export default function CryptoInformation({ route }) {
 
       <Chart
         key={cryptoData._id}
-        currentPrice={cryptoData.prices[cryptoData.prices.length - 1].value}
+        cryptoId={cryptoData._id} // Pass the cryptoId to Chart
+        initialCurrentPrice={
+          cryptoData.prices[cryptoData.prices.length - 1].value
+        }
         symbol={cryptoData.symbol}
         logoUrl={cryptoData.image.small}
         name={cryptoData.name}
-        priceChange7d={cryptoData.metrics[2].percentageChange}
-        movingAverage={cryptoData.metrics[2].movingAverage}
-        percentageChange={cryptoData.metrics[2].percentageChange}
-        sparkline_in_7d={transformPrices}
+        initialMovingAverage={oneHourMetric.movingAverage}
+        initialPercentageChange={oneHourMetric.percentageChange}
+        initialSparklineData={transformPrices}
       />
 
       <TouchableOpacity

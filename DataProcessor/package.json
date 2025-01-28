@@ -26,6 +26,7 @@
   "dependencies": {
     "@types/date-fns": "^2.5.3",
     "@types/multer": "^1.4.12",
+    "@types/socket.io": "^3.0.1",
     "bcrypt": "^5.1.1",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
@@ -43,6 +44,7 @@
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
     "routing-controllers": "^0.10.4",
+    "socket.io": "^4.8.1",
     "typedi": "^0.10.0",
     "zod": "^3.24.1"
   }
