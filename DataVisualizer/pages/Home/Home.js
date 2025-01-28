@@ -14,7 +14,6 @@ export default function Home() {
     navigation.navigate("CryptoInformation", { paramKey: object }); // Navega para a tela CryptoInformation
   };
 
-  console.log(SAMPLE_DATA[0].prices[SAMPLE_DATA[0].prices.length - 1].value)
   return (
     <ScrollView contentContainerStyle={{ flexGrow: 1 }}>
       <View style={styles.body}>
