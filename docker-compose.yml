@@ -13,31 +13,24 @@ services:
       - ./mongo-data:/data/db
       - ./scripts/mongodb-init.sh:/init-replica.sh
     command: /init-replica.sh
-    restart: unless-stopped
-    networks:
-      - app-network
+    restart: always
 
-  # Eclipse Mosquitto MQTT Broker
   mosquitto:
-    image: eclipse-mosquitto:latest
+    image: eclipse-mosquitto:2
     container_name: mosquitto
+    restart: always
+
     ports:
-      - "1883:1883" # MQTT Port
-      - "9001:9001" # WebSocket Port
+      - "1883:1883" # Raw MQTT
+      - "9001:9001" # WebSockets
+
     volumes:
-      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
       - ./mosquitto/data:/mosquitto/data
       - ./mosquitto/log:/mosquitto/log
-    restart: unless-stopped
-    networks:
-      - app-network
 
 volumes:
   mongo-data:
     driver: local
   mosquitto:
     driver: local
-
-networks:
-  app-network:
-    driver: bridge
