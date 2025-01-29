@@ -12,6 +12,7 @@ import { MongoConfig } from "./config/MongoConfig";
 import { EXIT_STATUS, HTTP_CODES } from "./config/constants";
 import Container from "typedi";
 import { WebSocketService } from "./services/WebScoketService";
+import { CryptoCoinPrice } from "./models/CryptoCoinPrice";
 
 const IS_DEV_ENV = env.NODE_ENV === "development";
 
