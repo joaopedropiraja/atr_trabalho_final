@@ -10,6 +10,7 @@ import { CryptoCoinPriceService } from "./CryptoCoinPriceService";
 import { Types } from "mongoose";
 import { CryptoCoinPrice, ICryptoCoinPrice } from "../models/CryptoCoinPrice";
 import { secondsToMilliSeconds } from "../utils/secondsToMilliseconds";
+import { WebSocketService } from "./WebScoketService";
 
 enum TOPICS {
   COLLECTOR_START = "collector/start",
@@ -53,28 +54,20 @@ export class MonitorService {
   constructor(
     private readonly cryptoCoinService: CryptoCoinService,
     private readonly cryptoCoinPriceService: CryptoCoinPriceService,
-    private readonly mqttClientService: MqttClientService
+    private readonly mqttClientService: MqttClientService,
+    private readonly webSocketService: WebSocketService
   ) {}
 
-  /**
-   * Starts the collector by:
-   * 1. Connecting to MQTT (if not already connected).
-   * 2. Subscribing to SENSOR_MONITORS.
-   * 3. Publishing the initial list of crypto coins to COLLECTOR_START.
-   */
   async startCollector(): Promise<boolean> {
     if (this.isCollectorActive) return false;
 
-    // Ensure MQTT client is connected
     await this.mqttClientService.connect();
 
-    // Subscribe to sensor monitors
     await this.mqttClientService.subscribe(
       TOPICS.SENSOR_MONITORS,
       this.sensorsMonitorOnMessage.bind(this)
     );
 
-    // Get crypto coins and publish to collector/start
     const result = await this.cryptoCoinService.get();
     const cryptoCoins = result.data.map(({ symbol, dataInterval }) => {
       const coinCode = `${symbol.toUpperCase()}${this.convertToCoin}`;
@@ -89,44 +82,32 @@ export class MonitorService {
     return true;
   }
 
-  /**
-   * Stops the collector by:
-   * 1. Publishing to COLLECTOR_STOP.
-   * 2. Clearing internal intervals.
-   * 3. Ending the MQTT connection (optional).
-   */
   async stopCollector(): Promise<boolean> {
     if (!this.isCollectorActive) return false;
 
     await this.mqttClientService.publish(TOPICS.COLLECTOR_STOP);
 
-    // Clear intervals and mark collector as inactive
     this.clearCryptoCoinsMap();
     this.isCollectorActive = false;
 
-    // Completely close the MQTT connection
     await this.mqttClientService.end();
 
     return true;
   }
 
-  /**
-   * Callback executed when a message arrives on SENSOR_MONITORS.
-   */
   private async sensorsMonitorOnMessage(
     topic: string,
     payload: Buffer,
     packet: IPublishPacket
   ) {
+    if (this.isCollectorActive) return;
+
     const payloadObj = JSON.parse(payload.toString());
     const machine = plainToClass(Machine, payloadObj);
 
     const cryptoCoins = await this.updateCryptoCoinSensorIds(machine);
     this.cryptoCoinsMap = this.buildCryptoCoinsMap(cryptoCoins);
 
-    if (this.isCollectorActive) return;
-
-    // Subscribe to sensors topic
     await this.mqttClientService.subscribe(
       `${TOPICS.DEFAULT_SENSORS}/${machine.machine_id}/#`,
       this.sensorsOnMessage.bind(this)
@@ -135,9 +116,6 @@ export class MonitorService {
     this.isCollectorActive = true;
   }
 
-  /**
-   * Handle sensors message
-   */
   private async sensorsOnMessage(
     topic: string,
     payload: Buffer,
@@ -159,16 +137,17 @@ export class MonitorService {
       return;
     }
 
-    // Persist the new crypto coin price
     const lastCryptoCoinPrice = await this.saveNewCryptoCoinPrice(
       cryptoCoinId,
       payload
     );
 
-    // Aggregated metrics
     const metrics = await this.cryptoCoinPriceService.getMetrics(cryptoCoinId);
 
-    // Publish metrics
+    this.webSocketService.broadcast(
+      `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`,
+      JSON.stringify({ lastCryptoCoinPrice, metrics })
+    );
     await this.mqttClientService.publish(
       `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`,
       JSON.stringify({ lastCryptoCoinPrice, metrics })
@@ -179,9 +158,6 @@ export class MonitorService {
 
   private async sendAlerts(lastCryptoCoinPrice: ICryptoCoinPrice) {}
 
-  /**
-   * Map the sensors to the crypto coins in the database (updating their sensorId field).
-   */
   private async updateCryptoCoinSensorIds(machine: Machine) {
     return Promise.all(
       machine.sensors.map((sensor) => {
@@ -194,12 +170,8 @@ export class MonitorService {
     );
   }
 
-  /**
-   * Build a map of cryptoCoins keyed by their sensor IDs, each with its own interval
-   * for periodic tasks (alerts, logs, etc.).
-   */
   private buildCryptoCoinsMap(cryptoCoins: (ICryptoCoin | null)[]) {
-    this.clearCryptoCoinsMap();
+    this.clearCryptoCoinIntervals();
 
     return cryptoCoins?.reduce<CryptoCoinMap>((acc, cryptoCoin) => {
       if (!cryptoCoin?.sensorId) return acc;
@@ -215,21 +187,19 @@ export class MonitorService {
     }, {});
   }
 
-  /**
-   * Clears all intervals in the cryptoCoinsMap and sets it to undefined.
-   */
   private clearCryptoCoinsMap() {
+    this.clearCryptoCoinIntervals();
+    this.cryptoCoinsMap = null;
+  }
+
+  private clearCryptoCoinIntervals() {
     if (this.cryptoCoinsMap) {
       Object.values(this.cryptoCoinsMap).forEach(({ interval }) => {
         if (interval) clearInterval(interval);
       });
     }
-    this.cryptoCoinsMap = null;
   }
 
-  /**
-   * Re-schedule the alert interval whenever a new sensor reading arrives.
-   */
   private updateCryptoCoinsMapInterval(sensorId: string) {
     if (!this.cryptoCoinsMap?.[sensorId]) {
       logger.warn(`Sensor ID "${sensorId}" not found in Map.`);
@@ -238,30 +208,22 @@ export class MonitorService {
 
     const { cryptoCoin } = this.cryptoCoinsMap[sensorId];
 
-    // Clear the existing interval
     if (this.cryptoCoinsMap[sensorId].interval) {
       clearInterval(this.cryptoCoinsMap[sensorId].interval!);
     }
 
-    // Set up a new interval
     this.cryptoCoinsMap[sensorId].interval = setInterval(
       this.sendAlert(cryptoCoin).bind(this),
       secondsToMilliSeconds(cryptoCoin.dataInterval) * this.intervalMultiplier
     );
   }
 
-  /**
-   * Simple placeholder for any periodic work. Replace this with your actual logic.
-   */
   private sendAlert(cryptoCoin: ICryptoCoin) {
     return () => {
       console.log(`Alert for ${cryptoCoin.name}`);
     };
   }
 
-  /**
-   * Persists a new crypto coin price reading in the database.
-   */
   private async saveNewCryptoCoinPrice(
     cryptoCoinId: Types.ObjectId,
     payload: Buffer
