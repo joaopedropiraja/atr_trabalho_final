@@ -8,48 +8,60 @@ import {
 import React, { useState } from "react";
 import { useNavigation } from "@react-navigation/native";
 import Chart from "../../components/Chart";
+import { Dropdown } from 'react-native-element-dropdown';
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 export default function CryptoAlert({ route }) {
   const cryptoInfo = route.params.paramKey;
 
-  const [valueInf, setValueInf] = useState("");
-  const [valueSup, setValueSup] = useState("");
+  const valueOptionsAlert = [
+    { label: 'Alerta de aumento de preço', value: 'alert_Superior'},
+    { label: 'Alerta de queda de preço', value: 'alert_Inferior'}
+  ]
 
+  const [typeAlert, setTypeAlert] = useState("");
+  const [valueAlert, setValueAlert] = useState("");
+ 
   const CryptoAndAlertObject = {
     ...cryptoInfo,
-    alert_infereior_value: valueInf,
-    alert_superior_value: valueSup,
+    alert_type: typeAlert,
+    alert_value: valueAlert,
   };
-
+console.log(CryptoAndAlertObject)
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Crypto Alerts</Text>
-      <Text style={styles.subtitle}>
-        Alerta para valor de limite inferior (R$)
-      </Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Digite aqui"
-        value={valueInf}
-        onChangeText={(text) => setValueInf(text)}
-        keyboardType="numeric"
-      />
-      <View style={styles.viewMargin} />
-      <Text style={styles.subtitle}>
-        Alerta para valor de limite superior (R$)
-      </Text>
-      <TextInput
-        style={styles.input}
-        placeholder="Digite aqui"
-        value={valueSup}
-        onChangeText={(text) => setValueSup(text)}
-        keyboardType="numeric"
-      />
-      <TouchableOpacity style={styles.cont}>
-        <Text style={styles.titleText}>Definir valores</Text>
-      </TouchableOpacity>
+      <Dropdown
+          style={[styles.dropdown]}
+          placeholderStyle={styles.placeholderStyle}
+          selectedTextStyle={styles.selectedTextStyle}
+          iconStyle={styles.iconStyle}
+          data={valueOptionsAlert}
+          maxHeight={300}
+          labelField="label"
+          valueField="value"
+          placeholder= "Selecione o tipo de alerta"
+          value={typeAlert}
+          onChange={item => {
+            setTypeAlert(item.value);
+          }}
+        />
+        <Text style={styles.subtitle}>
+          Digite o valor para o alerta
+        </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Digite aqui"
+          value={valueAlert}
+          onChangeText={(text) => setValueAlert(text)}
+          keyboardType="numeric"
+        />
+        <TouchableOpacity style={styles.cont}>
+          <Text style={styles.titleText}>Definir valores</Text>
+        </TouchableOpacity>
     </View>
   );
+  
 }
 
 const styles = StyleSheet.create({
@@ -91,8 +103,44 @@ const styles = StyleSheet.create({
     marginTop: 4,
     fontSize: 17,
     color: "#000000",
+    fontWeight: "bold",
   },
   viewMargin: {
     marginTop: 20,
   },
+  dropdown: {
+      height: 40,
+      borderColor: 'gray',
+      borderWidth: 0.5,
+      borderRadius: 8,
+      paddingHorizontal: 8,
+      marginTop: 10,
+      marginBottom: 10
+    },
+    icon: {
+      marginRight: 5,
+    },
+    label: {
+      position: 'absolute',
+      backgroundColor: 'white',
+      left: 22,
+      top: 8,
+      zIndex: 999,
+      paddingHorizontal: 8,
+      fontSize: 14,
+    },
+    placeholderStyle: {
+      fontSize: 16,
+    },
+    selectedTextStyle: {
+      fontSize: 16,
+    },
+    iconStyle: {
+      width: 20,
+      height: 20,
+    },
+    inputSearchStyle: {
+      height: 40,
+      fontSize: 16,
+    },
 });
