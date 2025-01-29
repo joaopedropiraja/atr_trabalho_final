@@ -28,17 +28,10 @@ export class CryptoCoinService {
     return this.cryptoCoinRepo.getByIdWithMetrics(cryptoCoinId);
   }
 
-  async getByIdWithPricesAndMetrics(
-    cryptoCoinId: string,
-    pricesLabel: string,
-    pricesPage: number,
-    pricesLimit: number
-  ) {
+  async getByIdWithPricesAndMetrics(cryptoCoinId: string, metricLabel: string) {
     return this.cryptoCoinRepo.getByIdWithPricesAndMetrics(
       cryptoCoinId,
-      pricesLabel,
-      pricesPage,
-      pricesLimit
+      metricLabel
     );
   }
 

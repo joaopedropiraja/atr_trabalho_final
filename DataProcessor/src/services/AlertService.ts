@@ -1,10 +1,15 @@
 import { Service } from "typedi";
 import { AlertRepository } from "../repositories/AlertRepository";
 import { IAlert } from "../models/Alert";
+import { ICryptoCoinPrice } from "../models/CryptoCoinPrice";
 
 @Service()
 export class AlertService {
   constructor(private readonly alertRepository: AlertRepository) {}
+
+  async updateElegibleAlerts(lastCryptoCoinPrice: ICryptoCoinPrice) {
+    return this.alertRepository.updateElegibleAlerts(lastCryptoCoinPrice);
+  }
 
   async get(
     page: number = 1,

@@ -11,6 +11,7 @@ import { Types } from "mongoose";
 import { CryptoCoinPrice, ICryptoCoinPrice } from "../models/CryptoCoinPrice";
 import { secondsToMilliSeconds } from "../utils/secondsToMilliseconds";
 import { WebSocketService } from "./WebScoketService";
+import { AlertService } from "./AlertService";
 
 enum TOPICS {
   COLLECTOR_START = "collector/start",
@@ -54,6 +55,7 @@ export class MonitorService {
   constructor(
     private readonly cryptoCoinService: CryptoCoinService,
     private readonly cryptoCoinPriceService: CryptoCoinPriceService,
+    private readonly alertService: AlertService,
     private readonly mqttClientService: MqttClientService,
     private readonly webSocketService: WebSocketService
   ) {}
@@ -146,13 +148,20 @@ export class MonitorService {
 
     await this.sendAlerts(cryptoCoinWithMetrics.lastPrice);
 
-    // await this.mqttClientService.publish(
-    //   `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`,
-    //   JSON.stringify({ lastCryptoCoinPrice, metrics })
-    // );
+    await this.mqttClientService.publish(
+      `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`,
+      JSON.stringify(cryptoCoinWithMetrics)
+    );
   }
 
-  private async sendAlerts(lastCryptoCoinPrice: ICryptoCoinPrice) {}
+  private async sendAlerts(lastCryptoCoinPrice: ICryptoCoinPrice) {
+    const elegibleAlerts = await this.alertService.updateElegibleAlerts(
+      lastCryptoCoinPrice
+    );
+    // await Promise.all(elegibleAlerts.map((alert) =>  this.pushNotificationService.sendMessage(alert)))
+
+    console.log(elegibleAlerts);
+  }
 
   private async updateCryptoCoinSensorIds(machine: Machine) {
     return Promise.all(
@@ -167,7 +176,7 @@ export class MonitorService {
   }
 
   private buildCryptoCoinsMap(cryptoCoins: (ICryptoCoin | null)[]) {
-    this.clearCryptoCoinIntervals();
+    this.clearCryptoCoinsMap();
 
     return cryptoCoins?.reduce<CryptoCoinMap>((acc, cryptoCoin) => {
       if (!cryptoCoin?.sensorId) return acc;
@@ -184,15 +193,11 @@ export class MonitorService {
   }
 
   private clearCryptoCoinsMap() {
-    this.clearCryptoCoinIntervals();
-    this.cryptoCoinsMap = null;
-  }
-
-  private clearCryptoCoinIntervals() {
     if (this.cryptoCoinsMap) {
       Object.values(this.cryptoCoinsMap).forEach(({ interval }) => {
         if (interval) clearInterval(interval);
       });
+      this.cryptoCoinsMap = null;
     }
   }
 

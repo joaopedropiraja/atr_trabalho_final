@@ -28,16 +28,9 @@ export class CryptoCoinController {
   @Get("/:id/prices-metrics")
   async getCryptoWithPrices(
     @Param("id") id: string,
-    @QueryParam("pricesLabel") pricesLabel: string,
-    @QueryParam("pricesPage") pricesPage: number,
-    @QueryParam("pricesLimit") pricesLimit: number
+    @QueryParam("metricLabel") metricLabel: string
   ) {
-    return this.cryptoCoinService.getByIdWithPricesAndMetrics(
-      id,
-      pricesLabel,
-      pricesPage,
-      pricesLimit
-    );
+    return this.cryptoCoinService.getByIdWithPricesAndMetrics(id, metricLabel);
   }
 
   @Get("/:symbol")
