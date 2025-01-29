@@ -126,12 +126,8 @@ export class CryptoCoinRepository extends MongoRepository<ICryptoCoin> {
 
   async getByIdWithPricesAndMetrics(
     cryptoCoinId: string | Types.ObjectId,
-    pricesLabel: string = "1h",
-    pricesPage: number = 1,
-    pricesLimit: number = 0
+    metricLabel: string = "1h"
   ) {
-    const pricesSkip = (pricesPage - 1) * pricesLimit;
-
     const now = new Date();
     const timeRanges = [
       { label: "1h", startTime: subHours(now, 1) },
@@ -142,10 +138,8 @@ export class CryptoCoinRepository extends MongoRepository<ICryptoCoin> {
 
     const pipeline = this.buildCryptoCoinAggregation(
       cryptoCoinId,
-      pricesLabel,
-      timeRanges,
-      pricesSkip,
-      pricesLimit
+      metricLabel,
+      timeRanges
     );
 
     const [result] = await this.model.aggregate<CryptoCoinAllData>(pipeline);
@@ -194,13 +188,11 @@ export class CryptoCoinRepository extends MongoRepository<ICryptoCoin> {
 
   private buildCryptoCoinAggregation(
     cryptoCoinId: string | Types.ObjectId,
-    pricesLabel: string,
-    timeRanges: { label: string; startTime: Date }[],
-    pricesSkip: number,
-    pricesLimit: number
+    metricLabel: string,
+    timeRanges: { label: string; startTime: Date }[]
   ): PipelineStage[] {
     const pricesStartTime =
-      timeRanges.find(({ label }) => label === pricesLabel)?.startTime ||
+      timeRanges.find(({ label }) => label === metricLabel)?.startTime ||
       timeRanges[0].startTime;
 
     return [
@@ -211,7 +203,7 @@ export class CryptoCoinRepository extends MongoRepository<ICryptoCoin> {
           let: { coinId: "$_id" },
           pipeline: [
             { $match: { $expr: { $eq: ["$cryptoCoin", "$$coinId"] } } },
-            this.buildDynamicFacet(timeRanges, pricesSkip, pricesLimit) as any,
+            this.buildDynamicFacet(timeRanges) as any,
             this.buildDynamicMetricsStage(timeRanges),
           ],
           as: "priceData",
@@ -249,16 +241,11 @@ export class CryptoCoinRepository extends MongoRepository<ICryptoCoin> {
   }
 
   private buildDynamicFacet(
-    timeRanges: { label: string; startTime: Date }[],
-    pricesSkip = 0,
-    pricesLimit = 0
+    timeRanges: { label: string; startTime: Date }[]
   ): PipelineStage {
     const facetObj: Record<string, any[]> = {
-      allPrices: [{ $sort: { timestamp: 1 } }, { $skip: pricesSkip }],
+      allPrices: [{ $sort: { timestamp: 1 } }],
     };
-    if (pricesLimit > 0) {
-      facetObj.allPrices.push({ $limit: pricesLimit });
-    }
 
     timeRanges.forEach(({ label, startTime }) => {
       facetObj[label] = [
