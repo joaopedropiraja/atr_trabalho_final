@@ -21,9 +21,9 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get("/")
-  async getPaginatedUsers(
+  async getUsers(
     @QueryParam("page") page: number = 1,
-    @QueryParam("limit") limit: number = 10
+    @QueryParam("limit") limit: number = 0
   ) {
     return this.userService.get(page, limit);
   }

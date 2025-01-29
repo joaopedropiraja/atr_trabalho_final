@@ -2,6 +2,7 @@ import { Service } from "typedi";
 import { CryptoCoinRepository } from "../repositories/CryptoCoinRepository";
 import { ICryptoCoin } from "../models/CryptoCoin";
 import { ConflictError } from "../errors/ConflictError";
+import { Types } from "mongoose";
 
 @Service()
 export class CryptoCoinService {
@@ -9,6 +10,10 @@ export class CryptoCoinService {
 
   async getBySymbol(symbol: string): Promise<ICryptoCoin | null> {
     return this.cryptoCoinRepo.getBySymbol(symbol);
+  }
+
+  async getAll(): Promise<any> {
+    return this.cryptoCoinRepo.getAll();
   }
 
   async get(
@@ -19,8 +24,22 @@ export class CryptoCoinService {
     return this.cryptoCoinRepo.get(page, limit, query);
   }
 
-  async getWithPrices(pricesPage: number = 1, pricesLimit: number = 0) {
-    return this.cryptoCoinRepo.getWithPrices(pricesPage, pricesLimit);
+  async getByIdWithMetrics(cryptoCoinId: string | Types.ObjectId) {
+    return this.cryptoCoinRepo.getByIdWithMetrics(cryptoCoinId);
+  }
+
+  async getByIdWithPricesAndMetrics(
+    cryptoCoinId: string,
+    pricesLabel: string,
+    pricesPage: number,
+    pricesLimit: number
+  ) {
+    return this.cryptoCoinRepo.getByIdWithPricesAndMetrics(
+      cryptoCoinId,
+      pricesLabel,
+      pricesPage,
+      pricesLimit
+    );
   }
 
   async create(data: ICryptoCoin): Promise<ICryptoCoin> {

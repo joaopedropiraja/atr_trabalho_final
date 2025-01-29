@@ -1,0 +1,19 @@
+@environment = dev
+@route = alerts
+
+# @name getAlerts
+GET {{baseUrl}}/{{route}} HTTP/1.1
+
+###
+
+# @name createAlert
+POST {{baseUrl}}/{{route}} HTTP/1.1
+Content-Type: application/json
+
+{
+  "userId": "67997e822ea9ab29275d1629",
+  "cryptoCoinId": "67959211bf2cd5f6ee4bd122",
+  "type": "priceUpperThreshold",
+  "value": 620000
+}
+

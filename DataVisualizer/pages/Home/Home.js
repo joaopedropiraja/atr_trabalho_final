@@ -15,7 +15,7 @@ export default function Home() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "http://192.168.0.14:3000/api/v1/crypto-coins/with-prices"
+          "http://192.168.0.14:3000/api/v1/crypto-coins"
         );
         setCryptos(response.data);
       } catch (err) {
@@ -41,24 +41,15 @@ export default function Home() {
         <View style={styles.dividerLine} />
 
         {cryptos.map((cryptoCoin) => {
-          const lastPriceIndex = cryptoCoin.prices?.length - 1;
-          const currentPrice =
-            lastPriceIndex >= 0 ? cryptoCoin.prices[lastPriceIndex].value : 0;
-
-          const METRIC_LABEL = "1d";
-          const percentageChangeLastHour =
-            cryptoCoin.metrics?.find(({ label }) => label === METRIC_LABEL)
-              ?.percentageChange || 0;
-
           return (
             <ListItem
-              key={cryptoCoin._id}
-              cryptoId={cryptoCoin._id}
+              key={cryptoCoin.id}
+              cryptoId={cryptoCoin.id}
               name={cryptoCoin.name}
               symbol={cryptoCoin.symbol}
-              currentPrice={currentPrice}
-              percentageChangeLastHour={percentageChangeLastHour}
-              logoUrl={cryptoCoin.image?.small}
+              imageSrc={cryptoCoin.image?.small}
+              lastPrice={cryptoCoin.lastPrice}
+              percentageChange1h={cryptoCoin.percentageChange1h}
               onPress={() => handleItemPress(cryptoCoin)}
             />
           );

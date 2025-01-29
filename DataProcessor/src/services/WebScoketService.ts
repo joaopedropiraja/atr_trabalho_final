@@ -3,20 +3,20 @@ import { Server as SocketIOServer } from "socket.io";
 
 @Service()
 export class WebSocketService {
-  private io?: SocketIOServer;
+  private _io?: SocketIOServer;
 
   public init(io: SocketIOServer): void {
-    this.io = io;
+    this._io = io;
   }
 
   public broadcast(event: string, data: any): void {
-    if (!this.io) {
+    if (!this._io) {
       return;
     }
-    this.io.emit(event, data);
+    this._io.emit(event, data);
   }
 
-  public getIO(): SocketIOServer | undefined {
-    return this.io;
+  get io(): SocketIOServer | undefined {
+    return this._io;
   }
 }
