@@ -68,8 +68,8 @@ export class MonitorService {
       this.sensorsMonitorOnMessage.bind(this)
     );
 
-    const result = await this.cryptoCoinService.get();
-    const cryptoCoins = result.data.map(({ symbol, dataInterval }) => {
+    const cryptos = await this.cryptoCoinService.get();
+    const cryptoCoins = cryptos.data.map(({ symbol, dataInterval }) => {
       const coinCode = `${symbol.toUpperCase()}${this.convertToCoin}`;
       return new CryptoCoinDetails(coinCode, dataInterval);
     });
@@ -137,23 +137,19 @@ export class MonitorService {
       return;
     }
 
-    const lastCryptoCoinPrice = await this.saveNewCryptoCoinPrice(
-      cryptoCoinId,
-      payload
-    );
+    await this.saveNewCryptoCoinPrice(cryptoCoinId, payload);
 
-    const metrics = await this.cryptoCoinPriceService.getMetrics(cryptoCoinId);
+    const event = `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`;
+    const cryptoCoinWithMetrics =
+      await this.cryptoCoinService.getByIdWithMetrics(cryptoCoinId);
+    this.webSocketService.broadcast(event, cryptoCoinWithMetrics);
 
-    this.webSocketService.broadcast(
-      `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`,
-      JSON.stringify({ lastCryptoCoinPrice, metrics })
-    );
-    await this.mqttClientService.publish(
-      `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`,
-      JSON.stringify({ lastCryptoCoinPrice, metrics })
-    );
+    await this.sendAlerts(cryptoCoinWithMetrics.lastPrice);
 
-    await this.sendAlerts(lastCryptoCoinPrice);
+    // await this.mqttClientService.publish(
+    //   `${TOPICS.PROCESSED_DATA}/${cryptoCoinId.toString()}`,
+    //   JSON.stringify({ lastCryptoCoinPrice, metrics })
+    // );
   }
 
   private async sendAlerts(lastCryptoCoinPrice: ICryptoCoinPrice) {}
@@ -237,6 +233,6 @@ export class MonitorService {
       timestamp: sensorData.timestamp,
     });
 
-    return this.cryptoCoinPriceService.create(cryptoCoinPrice);
+    await this.cryptoCoinPriceService.create(cryptoCoinPrice);
   }
 }

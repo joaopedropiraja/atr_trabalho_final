@@ -1,13 +1,14 @@
 @environment = dev
 @route = crypto-coins
+@id_bitcoin = 679599f56ff7a545f3e03729
 
 # @name getCryptoCoins
 GET {{baseUrl}}/{{route}} HTTP/1.1
 
 ###
 
-# @name getCryptoCoinsWithPrices
-GET {{baseUrl}}/{{route}}/with-prices?pricesLimit=5 HTTP/1.1
+# @name getCryptoCoinWithMetrics
+GET {{baseUrl}}/{{route}}/{{id_bitcoin}}/prices-metrics HTTP/1.1
 
 ###
 

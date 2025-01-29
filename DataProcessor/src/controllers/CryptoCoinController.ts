@@ -21,19 +21,23 @@ export class CryptoCoinController {
   constructor(private readonly cryptoCoinService: CryptoCoinService) {}
 
   @Get("/")
-  async getPaginatedCrypto(
-    @QueryParam("page") page: number = 1,
-    @QueryParam("limit") limit: number = 0
-  ) {
-    return this.cryptoCoinService.get(page, limit);
+  async getCrypto() {
+    return this.cryptoCoinService.getAll();
   }
 
-  @Get("/with-prices")
+  @Get("/:id/prices-metrics")
   async getCryptoWithPrices(
-    @QueryParam("pricesPage") pricesPage: number = 1,
-    @QueryParam("pricesLimit") pricesLimit: number = 0
+    @Param("id") id: string,
+    @QueryParam("pricesLabel") pricesLabel: string,
+    @QueryParam("pricesPage") pricesPage: number,
+    @QueryParam("pricesLimit") pricesLimit: number
   ) {
-    return this.cryptoCoinService.getWithPrices(pricesPage, pricesLimit);
+    return this.cryptoCoinService.getByIdWithPricesAndMetrics(
+      id,
+      pricesLabel,
+      pricesPage,
+      pricesLimit
+    );
   }
 
   @Get("/:symbol")

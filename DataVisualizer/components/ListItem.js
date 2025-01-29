@@ -4,19 +4,20 @@ import { io } from "socket.io-client";
 import styles from "./Styles";
 import { toMonetaryFormat } from "../utils/toMonetaryFormat";
 
+const DEFAULT_EVENT = "processed-data";
+const METRIC_LABEL = "1h";
+
 const ListItem = ({
   cryptoId,
   name,
   symbol,
-  currentPrice,
-  logoUrl,
-  percentageChangeLastHour,
+  imageSrc,
+  lastPrice,
+  percentageChange1h,
   onPress,
 }) => {
-  const [price, setPrice] = useState(currentPrice);
-  const [percentageChange, setPercentageChange] = useState(
-    percentageChangeLastHour
-  );
+  const [price, setPrice] = useState(lastPrice);
+  const [percentageChange, setPercentageChange] = useState(percentageChange1h);
 
   const priceChangeColor =
     percentageChange === 0
@@ -34,15 +35,16 @@ const ListItem = ({
       console.log("Connected to Socket.IO server with ID:", socket.id);
     });
 
-    socket.on(`processed-data/${cryptoId}`, (data) => {
+    const event = `DEFAULT_EVENT/${cryptoId}`;
+    socket.on(event, (data) => {
       try {
-        const { lastCryptoCoinPrice, metrics } = JSON.parse(data);
-        setPrice(lastCryptoCoinPrice.value);
+        console.log(data);
+        // const { lastCryptoCoinPrice, metrics } = JSON.parse(data);
+        // setPrice(lastCryptoCoinPrice.value);
 
-        const METRIC_LABEL = "1h";
-        setPercentageChange(
-          metrics.find(({ label }) => label === METRIC_LABEL).percentageChange
-        );
+        // setPercentageChange(
+        //   metrics.find(({ label }) => label === METRIC_LABEL).percentageChange
+        // );
       } catch (e) {
         console.log("Error in parsing the websocket data");
       }
@@ -66,7 +68,7 @@ const ListItem = ({
       <View style={styles.itemWrapper}>
         {/* Left Side */}
         <View style={styles.leftWrapper}>
-          <Image source={{ uri: logoUrl }} style={styles.image} />
+          <Image source={{ uri: imageSrc }} style={styles.image} />
           <View style={styles.titleWrapper}>
             <Text style={styles.title}>{name}</Text>
             <Text style={styles.subtitle}>{symbol}</Text>

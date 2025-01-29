@@ -3,10 +3,11 @@ import { CryptoCoin, ICryptoCoin } from "../models/CryptoCoin";
 import { MongoRepository } from "./MongoRepository";
 import { COLLECTION_NAMES } from "../config/constants";
 import { ICryptoCoinPrice } from "../models/CryptoCoinPrice";
-import { PipelineStage } from "mongoose";
+import { PipelineStage, Types } from "mongoose";
 import { subDays, subHours } from "date-fns";
 
-export type CryptoCoinWithPrices = {
+export type CryptoCoinGetAllResponse = {
+  id: string;
   name: string;
   symbol: string;
   image: {
@@ -14,8 +15,21 @@ export type CryptoCoinWithPrices = {
     small: string;
     large: string;
   };
-  dataInterval: number;
-  prices: ICryptoCoinPrice[];
+  lastPrice: ICryptoCoinPrice;
+  percentageChange1h: number;
+};
+
+export type CryptoCoinAllData = {
+  id: string;
+  name: string;
+  symbol: string;
+  image: {
+    thumb: string;
+    small: string;
+    large: string;
+  };
+  lastPrice: ICryptoCoinPrice;
+  prices?: ICryptoCoinPrice[];
   metrics: {
     label: string;
     movingAverage: number | null;
@@ -27,6 +41,56 @@ export type CryptoCoinWithPrices = {
 export class CryptoCoinRepository extends MongoRepository<ICryptoCoin> {
   constructor() {
     super(CryptoCoin);
+  }
+
+  async getAll() {
+    const pipeline: PipelineStage[] = [
+      {
+        $lookup: {
+          from: COLLECTION_NAMES.CRYPTO_COIN_PRICE,
+          localField: "_id",
+          foreignField: "cryptoCoin",
+          pipeline: [{ $sort: { timestamp: 1 } }],
+          as: "prices",
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          id: "$_id",
+          name: 1,
+          symbol: 1,
+          image: 1,
+          lastPrice: { $arrayElemAt: ["$prices", -1] },
+          percentageChange1h: {
+            $cond: [
+              { $eq: [{ $size: "$prices" }, 0] },
+              null,
+              {
+                $multiply: [
+                  {
+                    $divide: [
+                      {
+                        $subtract: [
+                          {
+                            $arrayElemAt: ["$prices.value", -1],
+                          },
+                          { $arrayElemAt: ["$prices.value", 0] },
+                        ],
+                      },
+                      { $arrayElemAt: ["$prices.value", 0] },
+                    ],
+                  },
+                  100,
+                ],
+              },
+            ],
+          },
+        },
+      },
+    ];
+
+    return this.model.aggregate<CryptoCoinGetAllResponse[]>(pipeline);
   }
 
   async getBySymbol(symbol: string): Promise<ICryptoCoin | null> {
@@ -42,7 +106,30 @@ export class CryptoCoinRepository extends MongoRepository<ICryptoCoin> {
       .exec();
   }
 
-  async getWithPrices(pricesPage: number = 1, pricesLimit: number = 0) {
+  async getByIdWithMetrics(cryptoCoinId: string | Types.ObjectId) {
+    const now = new Date();
+    const timeRanges = [
+      { label: "1h", startTime: subHours(now, 1) },
+      { label: "10h", startTime: subHours(now, 10) },
+      { label: "1d", startTime: subDays(now, 1) },
+      { label: "7d", startTime: subDays(now, 7) },
+    ];
+
+    const pipeline = this.buildCryptoCoinOnlyMetricsAggregation(
+      cryptoCoinId,
+      timeRanges
+    );
+
+    const [result] = await this.model.aggregate<CryptoCoinAllData>(pipeline);
+    return result;
+  }
+
+  async getByIdWithPricesAndMetrics(
+    cryptoCoinId: string | Types.ObjectId,
+    pricesLabel: string = "1h",
+    pricesPage: number = 1,
+    pricesLimit: number = 0
+  ) {
     const pricesSkip = (pricesPage - 1) * pricesLimit;
 
     const now = new Date();
@@ -54,21 +141,70 @@ export class CryptoCoinRepository extends MongoRepository<ICryptoCoin> {
     ];
 
     const pipeline = this.buildCryptoCoinAggregation(
+      cryptoCoinId,
+      pricesLabel,
       timeRanges,
       pricesSkip,
       pricesLimit
     );
 
-    return this.model.aggregate<CryptoCoinWithPrices[]>(pipeline);
+    const [result] = await this.model.aggregate<CryptoCoinAllData>(pipeline);
+    return result;
+  }
+
+  private buildCryptoCoinOnlyMetricsAggregation(
+    cryptoCoinId: string | Types.ObjectId,
+    timeRanges: { label: string; startTime: Date }[]
+  ) {
+    return [
+      { $match: { _id: new Types.ObjectId(cryptoCoinId) } },
+      {
+        $lookup: {
+          from: COLLECTION_NAMES.CRYPTO_COIN_PRICE,
+          let: { coinId: "$_id" },
+          pipeline: [
+            { $match: { $expr: { $eq: ["$cryptoCoin", "$$coinId"] } } },
+            this.buildDynamicFacet(timeRanges) as any,
+            this.buildDynamicMetricsStage(timeRanges),
+          ],
+          as: "priceData",
+        },
+      },
+
+      {
+        $unwind: {
+          path: "$priceData",
+          preserveNullAndEmptyArrays: true,
+        },
+      },
+
+      {
+        $project: {
+          _id: 0,
+          id: "$_id",
+          name: 1,
+          symbol: 1,
+          image: 1,
+          lastPrice: { $arrayElemAt: ["$priceData.allPrices", -1] },
+          metrics: "$priceData.metrics",
+        },
+      },
+    ];
   }
 
   private buildCryptoCoinAggregation(
+    cryptoCoinId: string | Types.ObjectId,
+    pricesLabel: string,
     timeRanges: { label: string; startTime: Date }[],
-    pricesSkip = 0,
-    pricesLimit = 0
+    pricesSkip: number,
+    pricesLimit: number
   ): PipelineStage[] {
+    const pricesStartTime =
+      timeRanges.find(({ label }) => label === pricesLabel)?.startTime ||
+      timeRanges[0].startTime;
+
     return [
-      // 1) $lookup from CryptoCoinPrice
+      { $match: { _id: new Types.ObjectId(cryptoCoinId) } },
       {
         $lookup: {
           from: COLLECTION_NAMES.CRYPTO_COIN_PRICE,
@@ -81,23 +217,31 @@ export class CryptoCoinRepository extends MongoRepository<ICryptoCoin> {
           as: "priceData",
         },
       },
-      // 2) Unwind "priceData"
+
       {
         $unwind: {
           path: "$priceData",
           preserveNullAndEmptyArrays: true,
         },
       },
-      // 3) Final $project
+
       {
         $project: {
+          _id: 0,
+          id: "$_id",
           name: 1,
           symbol: 1,
           image: 1,
-          dataInterval: 1,
-          sensorId: 1,
-          // rename priceData.allPrices => "prices"
-          prices: "$priceData.allPrices",
+          lastPrice: { $arrayElemAt: ["$priceData.allPrices", -1] },
+          prices: {
+            $filter: {
+              input: "$priceData.allPrices",
+              as: "price",
+              cond: {
+                $gte: ["$$price.timestamp", pricesStartTime],
+              },
+            },
+          },
           metrics: "$priceData.metrics",
         },
       },

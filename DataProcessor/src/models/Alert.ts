@@ -1,7 +1,7 @@
 import mongoose, { Schema, Document, Types } from "mongoose";
 import { COLLECTION_NAMES } from "../config/constants";
 
-enum AlertType {
+export enum AlertType {
   PRICE_UPPER_THRESHOLD = "priceUpperThreshold",
   PRICE_LOWER_THRESHOLD = "priceLowerThreshold",
 }
