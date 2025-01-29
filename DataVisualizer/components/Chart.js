@@ -33,59 +33,52 @@ const Chart = ({
    * Connect to Socket.IO for real-time updates
    */
   useEffect(() => {
-    const socket = io("http://192.168.0.14:3000", {
-      transports: ["websocket"],
-    });
-
-    socket.on("connect", () => {
-      console.log("Connected to Chart Socket.IO server with ID:", socket.id);
-    });
-
-    // Listen for chart updates for this cryptoId
-    socket.on(`processed-data/${cryptoId}`, (data) => {
-      try {
-        const parsed = JSON.parse(data);
-        const { lastCryptoCoinPrice, metrics } = parsed;
-
-        // Update current price
-        if (lastCryptoCoinPrice?.value !== undefined) {
-          setCurrentPrice(lastCryptoCoinPrice.value);
-          setSparklineData((data) =>
-            (data || []).concat([
-              {
-                x: new Date(lastCryptoCoinPrice.timestamp).getTime(),
-                y: lastCryptoCoinPrice.value,
-              },
-            ])
-          );
-        }
-
-        const METRIC_LABEL = "1h";
-        const oneHourMetric = metrics?.find(
-          ({ label }) => label === METRIC_LABEL
-        );
-        if (oneHourMetric?.movingAverage !== undefined) {
-          setMovingAverage(oneHourMetric.movingAverage);
-        }
-        if (oneHourMetric?.percentageChange !== undefined) {
-          setPercentageChange(oneHourMetric.percentageChange);
-        }
-      } catch (e) {
-        console.log("Error parsing chart websocket data:", e);
-      }
-    });
-
-    socket.on("connect_error", (err) => {
-      console.error("Chart socket connection error:", err.message);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Chart socket disconnected");
-    });
-
-    return () => {
-      socket.disconnect();
-    };
+    // const socket = io("http://192.168.0.14:3000", {
+    //   transports: ["websocket"],
+    // });
+    // socket.on("connect", () => {
+    //   console.log("Connected to Chart Socket.IO server with ID:", socket.id);
+    // });
+    // // Listen for chart updates for this cryptoId
+    // socket.on(`processed-data/${cryptoId}`, (data) => {
+    //   // try {
+    //   //   const parsed = JSON.parse(data);
+    //   //   const { lastCryptoCoinPrice, metrics } = parsed;
+    //   //   // Update current price
+    //   //   if (lastCryptoCoinPrice?.value !== undefined) {
+    //   //     setCurrentPrice(lastCryptoCoinPrice.value);
+    //   //     setSparklineData((data) =>
+    //   //       (data || []).concat([
+    //   //         {
+    //   //           x: new Date(lastCryptoCoinPrice.timestamp).getTime(),
+    //   //           y: lastCryptoCoinPrice.value,
+    //   //         },
+    //   //       ])
+    //   //     );
+    //   //   }
+    //   //   const METRIC_LABEL = "1h";
+    //   //   const oneHourMetric = metrics?.find(
+    //   //     ({ label }) => label === METRIC_LABEL
+    //   //   );
+    //   //   if (oneHourMetric?.movingAverage !== undefined) {
+    //   //     setMovingAverage(oneHourMetric.movingAverage);
+    //   //   }
+    //   //   if (oneHourMetric?.percentageChange !== undefined) {
+    //   //     setPercentageChange(oneHourMetric.percentageChange);
+    //   //   }
+    //   // } catch (e) {
+    //   //   console.log("Error parsing chart websocket data:", e);
+    //   // }
+    // });
+    // socket.on("connect_error", (err) => {
+    //   console.error("Chart socket connection error:", err.message);
+    // });
+    // socket.on("disconnect", () => {
+    //   console.log("Chart socket disconnected");
+    // });
+    // return () => {
+    //   socket.disconnect();
+    // };
   }, [cryptoId]);
 
   /**

@@ -16,7 +16,7 @@ const ListItem = ({
   percentageChange1h,
   onPress,
 }) => {
-  const [price, setPrice] = useState(lastPrice);
+  const [price, setPrice] = useState(lastPrice?.value || 0);
   const [percentageChange, setPercentageChange] = useState(percentageChange1h);
 
   const priceChangeColor =
@@ -27,40 +27,34 @@ const ListItem = ({
       : "#FF3830";
 
   useEffect(() => {
-    const socket = io("http://192.168.0.14:3000", {
-      transports: ["websocket"],
-    });
-
-    socket.on("connect", () => {
-      console.log("Connected to Socket.IO server with ID:", socket.id);
-    });
-
-    const event = `DEFAULT_EVENT/${cryptoId}`;
-    socket.on(event, (data) => {
-      try {
-        console.log(data);
-        // const { lastCryptoCoinPrice, metrics } = JSON.parse(data);
-        // setPrice(lastCryptoCoinPrice.value);
-
-        // setPercentageChange(
-        //   metrics.find(({ label }) => label === METRIC_LABEL).percentageChange
-        // );
-      } catch (e) {
-        console.log("Error in parsing the websocket data");
-      }
-    });
-
-    socket.on("connect_error", (err) => {
-      console.error("Connection error:", err.message);
-    });
-
-    socket.on("disconnect", () => {
-      console.log("Disconnected from Socket.IO server");
-    });
-
-    return () => {
-      socket.disconnect();
-    };
+    // const socket = io("http://192.168.0.14:3000", {
+    //   transports: ["websocket"],
+    // });
+    // socket.on("connect", () => {
+    //   console.log("Connected to Socket.IO server with ID:", socket.id);
+    // });
+    // const event = `processed-data/${cryptoId}`;
+    // socket.on(event, (data) => {
+    //   try {
+    //     console.log(data);
+    //     // const { lastCryptoCoinPrice, metrics } = JSON.parse(data);
+    //     // setPrice(lastCryptoCoinPrice.value);
+    //     // setPercentageChange(
+    //     //   metrics.find(({ label }) => label === METRIC_LABEL).percentageChange
+    //     // );
+    //   } catch (e) {
+    //     console.log("Error in parsing the websocket data");
+    //   }
+    // });
+    // socket.on("connect_error", (err) => {
+    //   console.error("Connection error:", err.message);
+    // });
+    // socket.on("disconnect", () => {
+    //   console.log("Disconnected from Socket.IO server");
+    // });
+    // return () => {
+    //   socket.disconnect();
+    // };
   }, []);
 
   return (

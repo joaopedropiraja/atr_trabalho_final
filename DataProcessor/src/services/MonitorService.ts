@@ -159,8 +159,6 @@ export class MonitorService {
       lastCryptoCoinPrice
     );
     // await Promise.all(elegibleAlerts.map((alert) =>  this.pushNotificationService.sendMessage(alert)))
-
-    console.log(elegibleAlerts);
   }
 
   private async updateCryptoCoinSensorIds(machine: Machine) {
