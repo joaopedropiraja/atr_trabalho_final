@@ -2,6 +2,7 @@ import React from "react";
 import { View, Text, StyleSheet, TouchableOpacity } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import Chart from "../../components/Chart";
+import AntDesign from '@expo/vector-icons/AntDesign';
 
 export default function CryptoInformation({ route }) {
   const cryptoData = route.params.paramKey;
@@ -12,6 +13,10 @@ export default function CryptoInformation({ route }) {
     navigation.navigate("CryptoAlert", { paramKey: object }); // Navigate to CryptoAlert screen
   };
 
+  const handleAlertIconPress = () => {
+    navigation.navigate("AlertHistory"); // Navigate to CryptoAlert screen
+  };
+
   // const transformPrices = cryptoData.prices.map((price) => ({
   //   x: new Date(price.timestamp).getTime(),
   //   y: price.value,
@@ -19,8 +24,12 @@ export default function CryptoInformation({ route }) {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Crypto Information</Text>
-
+      <View style={styles.subContainer}>
+        <Text style={styles.title}>Crypto Information</Text>
+        <TouchableOpacity onPress={() => handleAlertIconPress()}>
+          <AntDesign name = "warning" size = {23} color = 'black'></AntDesign> 
+        </TouchableOpacity>
+      </View>
       <Chart
         key={cryptoData._id}
         cryptoId={cryptoData._id}
@@ -49,6 +58,10 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
     padding: 20,
     marginVertical: 50,
+  },
+  subContainer: {
+    justifyContent: "space-between",
+    flexDirection: "row"    
   },
   title: {
     fontSize: 24,
