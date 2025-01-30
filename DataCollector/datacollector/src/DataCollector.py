@@ -12,23 +12,30 @@ from pydantic_core import from_json
 import paho.mqtt.client as mqtt
 from concurrent.futures import ThreadPoolExecutor
 
+
 class SensorConfig(BaseModel):
     id: uuid.UUID = Field(default_factory=uuid.uuid4)
     code: str
     data_interval: int = Field(default=5)
 
+
 class COLLECTOR_TOPIC(str, Enum):
     START = "start"
     STOP = "stop"
 
+
 class DataCollector:
     def __init__(
         self,
+        username: str,
+        password: str,
         machine_id: str,
         broker: str,
         port: int,
         sensor_monitors_interval: int = 30,
     ) -> None:
+        self.username = username
+        self.password = password
         self.machine_id = machine_id
         self.broker = broker
         self.port = port
@@ -45,6 +52,7 @@ class DataCollector:
 
     def connect(self):
         client = mqtt.Client()
+        client.username_pw_set(self.username, self.password)
 
         client.on_connect = self.__on_connect
         client.on_message = self.__collector_topic_on_message
@@ -93,14 +101,15 @@ class DataCollector:
 
     def __sensors_monitor(self, configs: list[SensorConfig]):
         client = mqtt.Client()
+        client.username_pw_set(self.username, self.password)
         client.connect(self.broker, self.port)
 
         sensors = [
             {
-                "code": c.code, 
-                "sensor_id": str(c.id), 
-                "data_type": "float", 
-                "data_interval": c.data_interval
+                "code": c.code,
+                "sensor_id": str(c.id),
+                "data_type": "float",
+                "data_interval": c.data_interval,
             }
             for c in configs
         ]
@@ -116,6 +125,7 @@ class DataCollector:
         time.sleep(idx)
 
         client = mqtt.Client()
+        client.username_pw_set(self.username, self.password)
         client.connect(self.broker, self.port)
         topic = f"{self.sensors_default_topic}/{crypto_config.id}"
 
@@ -123,7 +133,7 @@ class DataCollector:
             price = self.__fetch_crypto_price(crypto_config.code)
             if price == self.invalid_price:
                 return
-            
+
             timestamp = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
             message = {"timestamp": timestamp, "value": price}
 

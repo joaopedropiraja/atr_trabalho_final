@@ -31,6 +31,8 @@ export class MqttClientService {
 
     this.client = await mqtt.connectAsync({
       ...connOptions,
+      username: env.MQTT_USERNAME,
+      password: env.MQTT_PASSWORD,
       host: env.MQTT_HOST,
       port: env.MQTT_PORT,
     });

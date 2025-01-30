@@ -9,11 +9,11 @@ GET {{baseUrl}}/{{route}} HTTP/1.1
 # @name createAlert
 POST {{baseUrl}}/{{route}} HTTP/1.1
 Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Nzk5N2U4MjJlYTlhYjI5Mjc1ZDE2MjkiLCJpYXQiOjE3MzgxOTY4MTQsImV4cCI6MTczODI4MzIxNH0.XISci_yrYArYAkmd2axvDNDOIqPW4Tg_CPXJN6qM35A
 
 {
-  "userId": "67997e822ea9ab29275d1629",
   "cryptoCoinId": "67959211bf2cd5f6ee4bd122",
   "type": "priceUpperThreshold",
-  "value": 620000
+  "value": 400000
 }
 

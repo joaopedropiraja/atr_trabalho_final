@@ -4,13 +4,20 @@ import helmet from "helmet";
 import morgan from "morgan";
 import { createServer, Server } from "http";
 import express, { Application } from "express";
-import { useContainer, useExpressServer } from "routing-controllers";
+import {
+  Action,
+  UnauthorizedError,
+  useContainer,
+  useExpressServer,
+} from "routing-controllers";
 import { env } from "./config/envSchema";
 import logger from "./config/logger";
 import { MongoConfig } from "./config/MongoConfig";
 import { EXIT_STATUS, HTTP_CODES } from "./config/constants";
 import Container from "typedi";
 import { WebSocketConfig } from "./config/WebSocketConfig";
+import { UserService } from "./services/UserService";
+import { JwtService } from "./services/JwtService";
 
 const IS_DEV_ENV = env.NODE_ENV === "development";
 
@@ -75,7 +82,36 @@ class App {
       development: IS_DEV_ENV,
       controllers: [__dirname + "/controllers/*.ts"],
       middlewares: [__dirname + "/middlewares/*.ts"],
+      authorizationChecker: async (action: Action, roles: string[]) => {
+        const foundUser = await this.currentUserChecker(action);
+        return !!foundUser;
+      },
+      currentUserChecker: this.currentUserChecker,
     });
+  }
+
+  private async currentUserChecker(action: Action) {
+    const userService = Container.get(UserService);
+    const jwtService = Container.get(JwtService);
+
+    const authHeader =
+      action.request.headers.authorization ||
+      action.request.headers.Authorization;
+    if (!authHeader) throw new UnauthorizedError("No authorization header");
+
+    const [scheme, token] = authHeader.split(" ");
+
+    if (!/^Bearer$/i.test(scheme))
+      throw new UnauthorizedError("Token bad formatted");
+
+    if (!token) throw new UnauthorizedError("No token provided");
+
+    const { userId } = await jwtService.verifyToken(token);
+
+    const foundUser = await userService.getById(userId);
+    if (!foundUser) throw new UnauthorizedError("Invalid token");
+
+    return foundUser;
   }
 
   private async initializeErrorHandlers() {

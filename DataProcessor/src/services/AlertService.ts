@@ -13,10 +13,9 @@ export class AlertService {
 
   async get(
     page: number = 1,
-    limit: number = 0,
-    query: object = {}
+    limit: number = 0
   ): Promise<{ data: IAlert[]; total: number }> {
-    const { data, total } = await this.alertRepository.get(page, limit, query);
+    const { data, total } = await this.alertRepository.get(page, limit);
 
     return { data, total };
   }

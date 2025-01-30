@@ -1,16 +1,16 @@
 import { AlertType } from "../models/Alert";
-import { IsNotEmpty } from "class-validator";
+import { IsDefined, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateAlertDTO {
-  @IsNotEmpty()
-  userId!: string;
-
-  @IsNotEmpty()
+  @IsDefined({ always: true })
+  @IsString()
   cryptoCoinId!: string;
 
-  @IsNotEmpty()
+  @IsDefined({ always: true })
+  @IsString()
   type!: AlertType;
 
-  @IsNotEmpty()
+  @IsDefined({ always: true })
+  @IsNumber()
   value!: number;
 }

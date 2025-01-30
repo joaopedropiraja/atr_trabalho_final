@@ -1,3 +1,4 @@
+mosquitto/config/passwd
 mosquitto/data
 mosquitto/log
 mongo-data

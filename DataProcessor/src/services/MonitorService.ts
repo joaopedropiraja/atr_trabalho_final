@@ -158,6 +158,8 @@ export class MonitorService {
     const elegibleAlerts = await this.alertService.updateElegibleAlerts(
       lastCryptoCoinPrice
     );
+
+    elegibleAlerts.forEach(console.log);
     // await Promise.all(elegibleAlerts.map((alert) =>  this.pushNotificationService.sendMessage(alert)))
   }
 

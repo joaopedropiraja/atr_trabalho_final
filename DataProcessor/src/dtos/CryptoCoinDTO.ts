@@ -1,28 +1,40 @@
-import { IsNotEmpty } from "class-validator";
+import { IsDefined, IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateCryptoDTO {
-  @IsNotEmpty()
+  @IsDefined({ always: true })
+  @IsString()
   name!: string;
-  @IsNotEmpty()
+
+  @IsDefined({ always: true })
+  @IsString()
   symbol!: string;
-  @IsNotEmpty()
+
+  @IsDefined({ always: true })
   image!: {
     thumb: string;
     small: string;
     large: string;
   };
-  @IsNotEmpty()
+
+  @IsDefined({ always: true })
+  @IsNumber()
   dataInterval!: number;
 }
 
 export class UpdateCryptoDTO {
+  @IsString()
   name?: string;
+
+  @IsString()
   symbol?: string;
+
   image?: {
     thumb: string;
     small: string;
     large: string;
   };
+
+  @IsNumber()
   dataInterval?: number;
 }
 
