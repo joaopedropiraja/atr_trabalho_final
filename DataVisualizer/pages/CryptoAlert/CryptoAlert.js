@@ -21,13 +21,19 @@ export default function CryptoAlert({ route }) {
 
   const [typeAlert, setTypeAlert] = useState("");
   const [valueAlert, setValueAlert] = useState("");
+
+  const navigation = useNavigation();
+  const handleItemPress = () => {
+    navigation.navigate("Home", { paramKey: "alerta" });
+  };
+
  
   const CryptoAndAlertObject = {
     ...cryptoInfo,
     alert_type: typeAlert,
     alert_value: valueAlert,
   };
-console.log(CryptoAndAlertObject)
+
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Crypto Alerts</Text>
@@ -56,7 +62,7 @@ console.log(CryptoAndAlertObject)
           onChangeText={(text) => setValueAlert(text)}
           keyboardType="numeric"
         />
-        <TouchableOpacity style={styles.cont}>
+        <TouchableOpacity style={styles.cont} onPress={() => handleItemPress()}>
           <Text style={styles.titleText}>Definir valores</Text>
         </TouchableOpacity>
     </View>
