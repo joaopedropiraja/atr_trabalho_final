@@ -18,10 +18,9 @@ export class CryptoCoinService {
 
   async get(
     page: number = 1,
-    limit: number = 0,
-    query: object = {}
+    limit: number = 0
   ): Promise<{ data: ICryptoCoin[]; total: number }> {
-    return this.cryptoCoinRepo.get(page, limit, query);
+    return this.cryptoCoinRepo.get(page, limit);
   }
 
   async getByIdWithMetrics(cryptoCoinId: string | Types.ObjectId) {

@@ -1,6 +1,10 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { COLLECTION_NAMES } from "../config/constants";
 
+export enum ROLES {
+  ADMIN = "admin",
+}
+
 enum Platform {
   IOS = "ios",
   ANDROID = "android",
@@ -18,7 +22,7 @@ export class IUser extends Document {
   name!: string;
   email!: string;
   password?: string;
-  isAdmin!: boolean;
+  roles!: string[];
   devices!: Device[];
 }
 
@@ -32,11 +36,12 @@ const UserSchema: Schema = new Schema<IUser>(
       trim: true,
       lowercase: true,
     },
-    isAdmin: {
-      type: Boolean,
-      required: true,
-      default: false,
-    },
+    roles: [
+      {
+        type: String,
+        enum: Object.values(ROLES),
+      },
+    ],
     password: {
       type: String,
       required: true,

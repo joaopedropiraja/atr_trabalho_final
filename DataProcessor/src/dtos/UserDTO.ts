@@ -1,20 +1,28 @@
-import { IsEmail, IsNotEmpty } from "class-validator";
+import { IsDefined, IsEmail, IsString } from "class-validator";
 
 export class CreateUserDTO {
-  @IsNotEmpty()
+  @IsDefined({ always: true })
+  @IsString()
   name!: string;
 
+  @IsDefined({ always: true })
   @IsEmail()
+  @IsString()
   email!: string;
 
-  @IsNotEmpty()
+  @IsDefined({ always: true })
+  @IsString()
   password!: string;
-
-  isAdmin: boolean = false;
 }
 
 export class UpdateUserDTO {
+  @IsString()
   name?: string;
+
+  @IsEmail()
+  @IsString()
   email?: string;
+
+  @IsString()
   password?: string;
 }

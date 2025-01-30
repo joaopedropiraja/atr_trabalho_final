@@ -13,26 +13,34 @@ export class UserService {
   async get(
     page: number = 1,
     limit: number = 0,
-    query: object = {}
+    includePassword: boolean = false
   ): Promise<{ data: IUser[]; total: number }> {
-    const { data, total } = await this.userRepository.get(page, limit, query);
-    data.forEach((user) => (user.password = undefined));
+    const { data, total } = await this.userRepository.get(page, limit);
+    if (!includePassword) {
+      data.forEach((user) => (user.password = undefined));
+    }
 
     return { data, total };
   }
 
-  async getById(id: string): Promise<IUser | null> {
+  async getById(
+    id: string,
+    includePassword: boolean = false
+  ): Promise<IUser | null> {
     const user = await this.userRepository.getById(id);
-    if (!!user) {
+    if (!!user && !includePassword) {
       user.password = undefined;
     }
 
     return user;
   }
 
-  async getByEmail(email: string): Promise<IUser | null> {
+  async getByEmail(
+    email: string,
+    includePassword: boolean = false
+  ): Promise<IUser | null> {
     const user = await this.userRepository.getOneBy({ email });
-    if (!!user) {
+    if (!!user && !includePassword) {
       user.password = undefined;
     }
 

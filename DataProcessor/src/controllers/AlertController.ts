@@ -6,12 +6,15 @@ import {
   Body,
   QueryParam,
   HttpCode,
+  CurrentUser,
 } from "routing-controllers";
 
 import { HTTP_CODES } from "../config/constants";
 import { AlertService } from "../services/AlertService";
 import { CreateAlertDTO } from "../dtos/AlertDTO";
 import { Alert } from "../models/Alert";
+import { IUser } from "../models/User";
+import { Types } from "mongoose";
 
 @JsonController("/alerts", { transformResponse: false })
 @Service()
@@ -26,11 +29,16 @@ export class AlertController {
     return this.alertService.get(page, limit);
   }
 
+  @Get("/users")
+  async getAlertsByCurrentLoggedUser(@CurrentUser() user: IUser) {
+    return this.alertService.getByUserId(user._id as Types.ObjectId);
+  }
+
   @Post("/")
   @HttpCode(HTTP_CODES.CREATED)
-  async createAlert(@Body() alert: CreateAlertDTO) {
+  async createAlert(@Body() alert: CreateAlertDTO, @CurrentUser() user: IUser) {
     const newAlert = new Alert({
-      user: alert.userId,
+      user: user._id,
       cryptoCoin: alert.cryptoCoinId,
       type: alert.type,
       value: alert.value,
