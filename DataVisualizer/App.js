@@ -3,6 +3,7 @@ import Home from "./pages/Home/Home";
 import CryptoInformation from "./pages/CryptoInformation/CryptoInformation";
 import CryptoAlert from "./pages/CryptoAlert/CryptoAlert";
 import AlertHistory from "./pages/AlertHistory/AlertHistory";
+import Login from "./pages/Login/Login";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
@@ -13,7 +14,7 @@ export default function App() {
     <NavigationContainer>
       <HomeStack.Navigator
         screenOptions={{ headerShown: false }}
-        initialRouteName="Home"
+        initialRouteName="Login"
       >
         <HomeStack.Screen name="Home" component={Home} />
         <HomeStack.Screen
@@ -29,6 +30,11 @@ export default function App() {
         <HomeStack.Screen
           name="AlertHistory"
           component={AlertHistory}
+        />
+
+        <HomeStack.Screen
+          name="Login"
+          component={Login}
         />
 
       </HomeStack.Navigator>

@@ -37,6 +37,7 @@ export default function CryptoAlert({ route }) {
   return (
     <View style={styles.container}>
       <Text style={styles.title}>Crypto Alerts</Text>
+      <View style={styles.dividerLine} />
       <Dropdown
           style={[styles.dropdown]}
           placeholderStyle={styles.placeholderStyle}
@@ -148,5 +149,12 @@ const styles = StyleSheet.create({
     inputSearchStyle: {
       height: 40,
       fontSize: 16,
+    },
+    dividerLine: {
+      height: StyleSheet.hairlineWidth,
+      backgroundColor: "#A9ABB1",
+      marginHorizontal: 16,
+      marginTop: 16
+  
     },
 });
