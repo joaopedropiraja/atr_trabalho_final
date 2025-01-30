@@ -2,6 +2,8 @@ import { Service } from "typedi";
 import { AlertRepository } from "../repositories/AlertRepository";
 import { IAlert } from "../models/Alert";
 import { ICryptoCoinPrice } from "../models/CryptoCoinPrice";
+import { Types } from "mongoose";
+import { IUser } from "../models/User";
 
 @Service()
 export class AlertService {
@@ -9,6 +11,10 @@ export class AlertService {
 
   async updateElegibleAlerts(lastCryptoCoinPrice: ICryptoCoinPrice) {
     return this.alertRepository.updateElegibleAlerts(lastCryptoCoinPrice);
+  }
+
+  async getByUserId(userId: Types.ObjectId): Promise<IAlert[]> {
+    return this.alertRepository.getBy({ user: userId });
   }
 
   async get(

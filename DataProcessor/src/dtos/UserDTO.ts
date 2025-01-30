@@ -13,8 +13,6 @@ export class CreateUserDTO {
   @IsDefined({ always: true })
   @IsString()
   password!: string;
-
-  isAdmin: boolean = false;
 }
 
 export class UpdateUserDTO {

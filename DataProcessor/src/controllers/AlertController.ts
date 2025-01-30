@@ -14,6 +14,7 @@ import { AlertService } from "../services/AlertService";
 import { CreateAlertDTO } from "../dtos/AlertDTO";
 import { Alert } from "../models/Alert";
 import { IUser } from "../models/User";
+import { Types } from "mongoose";
 
 @JsonController("/alerts", { transformResponse: false })
 @Service()
@@ -26,6 +27,11 @@ export class AlertController {
     @QueryParam("limit") limit: number = 0
   ) {
     return this.alertService.get(page, limit);
+  }
+
+  @Get("/users")
+  async getAlertsByCurrentLoggedUser(@CurrentUser() user: IUser) {
+    return this.alertService.getByUserId(user._id as Types.ObjectId);
   }
 
   @Post("/")

@@ -3,9 +3,13 @@
 
 # @name startCollector
 POST {{baseUrl}}/{{route}}/start HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzlhZTE4ZjM5YTI4ZDM5YmU4MmQzODYiLCJpYXQiOjE3MzgyMDM5NzIsImV4cCI6MTczODI5MDM3Mn0.RiZ82wxJd9dPn136Sib4OrXPNUWILC6Lij6hqj-ljZ4
 
 ###
 
 # @name stopCollector
 POST {{baseUrl}}/{{route}}/stop HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzlhZTE4ZjM5YTI4ZDM5YmU4MmQzODYiLCJpYXQiOjE3MzgyMDM5NzIsImV4cCI6MTczODI5MDM3Mn0.RiZ82wxJd9dPn136Sib4OrXPNUWILC6Lij6hqj-ljZ4
 

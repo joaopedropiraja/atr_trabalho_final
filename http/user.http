@@ -21,10 +21,9 @@ POST {{baseUrl}}/{{route}} HTTP/1.1
 Content-Type: application/json
 
 {
-  "name": "John Doe",
-  "email": "johndoe@example.com",
-  "password": "securepassword",
-  "isAdmin": true
+  "name": "João Pedro Lima Pirajá",
+  "email": "jplp100@gamil.com",
+  "password": "securepassword"
 }
 
 ###

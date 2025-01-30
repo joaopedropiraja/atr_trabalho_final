@@ -19,6 +19,10 @@ export class MongoRepository<T extends Document> {
     return { data, total };
   }
 
+  async getBy(query: object): Promise<T[]> {
+    return this.model.find(query).exec();
+  }
+
   async getById(id: string): Promise<T | null> {
     return this.model.findById(id).exec();
   }

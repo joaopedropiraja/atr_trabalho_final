@@ -6,6 +6,7 @@ import { createServer, Server } from "http";
 import express, { Application } from "express";
 import {
   Action,
+  ForbiddenError,
   UnauthorizedError,
   useContainer,
   useExpressServer,
@@ -81,10 +82,17 @@ class App {
       routePrefix: env.BASE_ROUTE,
       development: IS_DEV_ENV,
       controllers: [__dirname + "/controllers/*.ts"],
-      middlewares: [__dirname + "/middlewares/*.ts"],
       authorizationChecker: async (action: Action, roles: string[]) => {
         const foundUser = await this.currentUserChecker(action);
-        return !!foundUser;
+
+        if (!roles.length) return true;
+
+        const isForbidden = roles.every((role) =>
+          foundUser.roles.find((r) => r === role)
+        );
+        if (!isForbidden) throw new ForbiddenError("User not allowed.");
+
+        return true;
       },
       currentUserChecker: this.currentUserChecker,
     });

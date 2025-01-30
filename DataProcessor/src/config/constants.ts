@@ -1,4 +1,3 @@
-// Supported success response status codes
 export enum HTTP_CODES {
   OK = 200,
   CREATED = 201,
@@ -11,7 +10,6 @@ export enum HTTP_CODES {
   INTERNAL_SERVER = 500,
 }
 
-// Application supported exit statuses
 export enum EXIT_STATUS {
   SUCCESS = 0,
   FAILURE = 1,
@@ -23,9 +21,3 @@ export enum COLLECTION_NAMES {
   CRYPTO_COIN = "cryptocoins",
   CRYPTO_COIN_PRICE = "cryptocoinprices",
 }
-
-export const IMAGE_CONFIG = {
-  fileName: "Image",
-  allowedMimeTypes: ["image/jpeg", "image/pjpeg", "image/png", "image/gif"],
-  sizeLimitInMB: 5,
-};

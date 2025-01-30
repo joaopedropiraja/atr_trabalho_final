@@ -6,6 +6,13 @@ GET {{baseUrl}}/{{route}} HTTP/1.1
 
 ###
 
+# @name getAlertsByCurrentLoggedUser
+GET {{baseUrl}}/{{route}}/users HTTP/1.1
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Nzk5N2U4MjJlYTlhYjI5Mjc1ZDE2MjkiLCJpYXQiOjE3MzgxOTY4MTQsImV4cCI6MTczODI4MzIxNH0.XISci_yrYArYAkmd2axvDNDOIqPW4Tg_CPXJN6qM35A
+
+###
+
 # @name createAlert
 POST {{baseUrl}}/{{route}} HTTP/1.1
 Content-Type: application/json
