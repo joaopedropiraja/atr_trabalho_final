@@ -9,7 +9,7 @@ export default function CryptoInformation({ route }) {
   const navigation = useNavigation();
 
   const handleItemPress = (object) => {
-    navigation.navigate("CryptoAlert", { paramKey: object }); // Navigate to CryptoAlert screen
+    navigation.navigate("AlertHistory", { paramKey: object }); // Navigate to CryptoAlert screen
   };
 
   // const transformPrices = cryptoData.prices.map((price) => ({

@@ -22,21 +22,11 @@ export default function App() {
           component={CryptoInformation}
         />
 
-        <HomeStack.Screen
-          name="CryptoAlert"
-          component={CryptoAlert}
-        />
+        <HomeStack.Screen name="CryptoAlert" component={CryptoAlert} />
 
-        <HomeStack.Screen
-          name="AlertHistory"
-          component={AlertHistory}
-        />
+        <HomeStack.Screen name="AlertHistory" component={AlertHistory} />
 
-        <HomeStack.Screen
-          name="Login"
-          component={Login}
-        />
-
+        <HomeStack.Screen name="Login" component={Login} />
       </HomeStack.Navigator>
     </NavigationContainer>
   );

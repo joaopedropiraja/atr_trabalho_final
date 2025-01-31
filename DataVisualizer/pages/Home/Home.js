@@ -8,7 +8,6 @@ import styles from "./Styles";
 import { SAMPLE_DATA } from "../../assets/data/sampleData";
 
 export default function Home() {
-
   const navigation = useNavigation();
   const [cryptos, setCryptos] = useState(SAMPLE_DATA);
 
