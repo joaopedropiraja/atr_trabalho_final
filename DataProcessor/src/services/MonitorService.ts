@@ -49,7 +49,7 @@ class SensorData {
 
 @Service()
 export class MonitorService {
-  private intervalMultiplier: number = 5;
+  private intervalMultiplier: number = 3;
   private convertToCoin: string = "BRL";
   private isCollectorActive: boolean = false;
   private cryptoCoinsMap: CryptoCoinMap | null = null;
