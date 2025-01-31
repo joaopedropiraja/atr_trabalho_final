@@ -12,6 +12,8 @@ import { CryptoCoinPrice, ICryptoCoinPrice } from "../models/CryptoCoinPrice";
 import { secondsToMilliSeconds } from "../utils/secondsToMilliseconds";
 import { WebSocketService } from "./WebScoketService";
 import { AlertService } from "./AlertService";
+import { AlertType } from "../models/Alert";
+import { toMonetaryFormat } from "../utils/toMonetaryFormat";
 
 enum TOPICS {
   COLLECTOR_START = "collector/start",
@@ -159,8 +161,19 @@ export class MonitorService {
       lastCryptoCoinPrice
     );
 
-    elegibleAlerts.forEach(console.log);
-    // await Promise.all(elegibleAlerts.map((alert) =>  this.pushNotificationService.sendMessage(alert)))
+    elegibleAlerts.forEach((alert) => {
+      const event = `alertEvent/${alert.user._id}`;
+
+      const typeName =
+        alert.type === AlertType.PRICE_LOWER_THRESHOLD ? "abaixo" : "acima";
+      const message = `${
+        (alert.cryptoCoin as any).name
+      } está no valor de ${toMonetaryFormat(
+        lastCryptoCoinPrice.value
+      )} (${typeName} do valor de ${toMonetaryFormat(alert.value)}).`;
+      this.webSocketService.broadcast(event, message);
+      console.log(message);
+    });
   }
 
   private async updateCryptoCoinSensorIds(machine: Machine) {
@@ -221,7 +234,10 @@ export class MonitorService {
 
   private sendAlert(cryptoCoin: ICryptoCoin) {
     return () => {
-      console.log(`Alert for ${cryptoCoin.name}`);
+      const message = `O monitormamento da cripto "${cryptoCoin.name}" está inativo.`;
+      console.log(message);
+      const event = "inactivity";
+      this.webSocketService.broadcast(event, message);
     };
   }
 

@@ -3,10 +3,12 @@ export enum AlertType {
   PRICE_LOWER_THRESHOLD = "priceLowerThreshold",
 }
 
-export type IAlert = {
+export type Alert = {
+  id: string;
   user: string;
   cryptoCoin: string;
   type: AlertType;
   value: number;
   isActive: boolean;
+  triggeredAt: string | null;
 };

@@ -17,6 +17,7 @@ export class AlertRepository extends MongoRepository<IAlert> {
       session.startTransaction();
 
       const query = {
+        cryptoCoin: lastCryptoCoinPrice.cryptoCoin,
         isActive: true,
         $or: [
           {
@@ -33,9 +34,12 @@ export class AlertRepository extends MongoRepository<IAlert> {
       const elegibleAlerts = await this.model
         .find(query)
         .session(session)
-        .populate("user")
+        .populate(["user", "cryptoCoin"])
         .exec();
-      await this.model.updateMany(query, { isActive: false });
+      await this.model.updateMany(query, {
+        isActive: false,
+        triggeredAt: new Date(),
+      });
       await session.commitTransaction();
 
       return elegibleAlerts;

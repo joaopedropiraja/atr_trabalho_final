@@ -1,3 +1,4 @@
+import useAuthStore from "@/stores/auth";
 import axios from "axios";
 const BASE_URL = `${process.env.EXPO_PUBLIC_API}/api/v1`;
 
@@ -6,14 +7,14 @@ export const api = axios.create({
   withCredentials: true,
 });
 
-// api.interceptors.request.use(
-//   (config) => {
-//     const { auth } = useAuthStore.getState();
-//     if (!config.headers.Authorization && auth?.accessToken) {
-//       // eslint-disable-next-line no-param-reassign
-//       config.headers.Authorization = `Bearer ${auth.accessToken}`;
-//     }
-//     return config;
-//   },
-//   (error) => Promise.reject(error)
-// );
+api.interceptors.request.use(
+  (config) => {
+    const { token } = useAuthStore.getState();
+    if (!config.headers.Authorization && !!token) {
+      // eslint-disable-next-line no-param-reassign
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);

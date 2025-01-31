@@ -13,8 +13,14 @@ export class AlertService {
     return this.alertRepository.updateElegibleAlerts(lastCryptoCoinPrice);
   }
 
-  async getByUserId(userId: Types.ObjectId): Promise<IAlert[]> {
-    return this.alertRepository.getBy({ user: userId });
+  async getByCryptoCoinIdAndLoggedUser(
+    userId: Types.ObjectId,
+    cryptoCoinId: Types.ObjectId
+  ): Promise<IAlert[]> {
+    return this.alertRepository.getBy({
+      user: userId,
+      cryptoCoin: cryptoCoinId,
+    });
   }
 
   async get(

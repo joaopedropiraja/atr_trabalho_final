@@ -16,7 +16,7 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Nzk5N
 # @name createAlert
 POST {{baseUrl}}/{{route}} HTTP/1.1
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2Nzk5N2U4MjJlYTlhYjI5Mjc1ZDE2MjkiLCJpYXQiOjE3MzgxOTY4MTQsImV4cCI6MTczODI4MzIxNH0.XISci_yrYArYAkmd2axvDNDOIqPW4Tg_CPXJN6qM35A
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiI2NzlhZTE4ZjM5YTI4ZDM5YmU4MmQzODYiLCJpYXQiOjE3MzgyOTc4NDksImV4cCI6MTczODM4NDI0OX0.38R9c79SwuzJjZnuSqsxVDeyPmc6lGXytNOk7NP-lPY
 
 {
   "cryptoCoinId": "67959211bf2cd5f6ee4bd122",

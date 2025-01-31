@@ -1,5 +1,5 @@
 import { AlertType } from "../models/Alert";
-import { IsDefined, IsNotEmpty, IsNumber, IsString } from "class-validator";
+import { IsDate, IsDefined, IsNumber, IsString } from "class-validator";
 
 export class CreateAlertDTO {
   @IsDefined({ always: true })

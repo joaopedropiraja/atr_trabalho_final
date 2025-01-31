@@ -161,6 +161,6 @@ class DataCollector:
 
     def __on_connect(self, client, userdata, flags, rc):
         if rc == 0:
-            print("Connected to MQTT Broker!")
+            print("Conectado ao Broker MQTT - Mosquitto!")
         else:
-            print("Failed to connect, return code %d\n", rc)
+            print("Falha na conexão, código de retorno %d\n", rc)

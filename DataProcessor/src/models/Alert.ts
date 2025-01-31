@@ -12,6 +12,7 @@ export class IAlert extends Document {
   type!: AlertType;
   value!: number;
   isActive!: boolean;
+  triggeredAt?: Date;
 }
 
 const AlertSchema: Schema = new Schema<IAlert>(
@@ -28,6 +29,7 @@ const AlertSchema: Schema = new Schema<IAlert>(
     },
     type: { type: String, required: true, enum: Object.values(AlertType) },
     value: { type: Number, required: true },
+    triggeredAt: { type: Date, default: null },
     isActive: { type: Boolean, required: true, default: true },
   },
   { timestamps: true }

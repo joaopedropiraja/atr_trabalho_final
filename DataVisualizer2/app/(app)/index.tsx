@@ -1,32 +1,19 @@
-import { useState } from "react";
-import { ScrollView, Text, View, StyleSheet } from "react-native";
-import { useNavigation } from "@react-navigation/native";
-import { sample_data } from "@/assets/data/sample_data";
+import {
+  ScrollView,
+  Text,
+  View,
+  StyleSheet,
+  ActivityIndicator,
+} from "react-native";
 import ListItem from "@/components/ListItem";
 import { router } from "expo-router";
-
-export interface CryptoCoin {
-  id: string;
-  name: string;
-  symbol: string;
-  image?: {
-    small?: string;
-  };
-  lastPrice?: {
-    value: number;
-  };
-  percentageChange1h?: number;
-}
-
-type NavigationType = {
-  navigate: (screen: string, params?: any) => void;
-};
+import { useGetCryptoCoins } from "@/hooks/cryptoCoins";
+import { CryptoCoin } from "@/api/cryptoCoins/types";
 
 export default function Home() {
-  const [cryptos, setCryptos] = useState<CryptoCoin[]>(sample_data);
+  const { data: cryptos, isLoading } = useGetCryptoCoins();
 
   const handleItemPress = (cryptoCoin: CryptoCoin) => {
-    // Pass the crypto's ID, name, and image to the Coin Details page
     router.push({
       pathname: `/coin/${cryptoCoin.id}`,
       params: {
@@ -35,11 +22,21 @@ export default function Home() {
       },
     });
   };
+
+  if (isLoading) {
+    return (
+      <View style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#00FFFF" />
+        <Text style={styles.loaderText}>Carregando dados...</Text>
+      </View>
+    );
+  }
+
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <View style={styles.dividerLine} />
 
-      {cryptos.map((cryptoCoin) => (
+      {cryptos?.map((cryptoCoin) => (
         <ListItem
           key={cryptoCoin.id}
           cryptoId={cryptoCoin.id}
@@ -58,7 +55,7 @@ export default function Home() {
 const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
-    backgroundColor: "#000", // Match dark background from login page
+    backgroundColor: "#000",
     padding: 16,
   },
   titleWrapper: {
@@ -68,12 +65,23 @@ const styles = StyleSheet.create({
   largeTitle: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#00FFFF", // Turquoise highlight
+    color: "#00FFFF",
     marginBottom: 4,
   },
   dividerLine: {
     height: 1,
     backgroundColor: "#222",
     marginBottom: 16,
+  },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#000",
+  },
+  loaderText: {
+    color: "#FFF",
+    marginTop: 10,
+    fontSize: 16,
   },
 });

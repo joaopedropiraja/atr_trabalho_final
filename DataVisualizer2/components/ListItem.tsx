@@ -1,8 +1,8 @@
 import { toMonetaryFormat } from "@/utils/toMonetaryFormat";
 import { toPercentageFormat } from "@/utils/toPercentageFormat";
-import React, { FC, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { View, Text, Image, TouchableOpacity, StyleSheet } from "react-native";
-
+import { io } from "socket.io-client";
 interface LastPrice {
   value: number;
 }
@@ -40,39 +40,43 @@ export default function ListItem({
       : "#FF3830";
 
   useEffect(() => {
-    // Optional Socket.io logic:
-    // const socket = io("http://192.168.0.14:3000", {
-    //   transports: ["websocket"],
-    // });
-    // socket.on("connect", () => {
-    //   console.log("Connected to server", socket.id);
-    // });
-    // const event = `processed-data/${cryptoId}`;
-    // socket.on(event, (data) => {
-    //   try {
-    //     // console.log(data);
-    //     // const { lastCryptoCoinPrice, metrics } = JSON.parse(data);
-    //     // setPrice(lastCryptoCoinPrice.value);
-    //     // setPercentageChange(metrics.find(({ label }) => label === METRIC_LABEL).percentageChange);
-    //   } catch (e) {
-    //     console.log("Error parsing websocket data");
-    //   }
-    // });
-    // socket.on("connect_error", (err) => {
-    //   console.error("Connection error:", err.message);
-    // });
-    // socket.on("disconnect", () => {
-    //   console.log("Disconnected");
-    // });
-    // return () => {
-    //   socket.disconnect();
-    // };
+    const socket = io(`${process.env.EXPO_PUBLIC_API}`, {
+      transports: ["websocket"],
+    });
+    socket.on("connect", () => {
+      console.log("Connected to server", socket.id);
+    });
+
+    const event = `processed-data/${cryptoId}`;
+    socket.on(event, (data) => {
+      try {
+        if (data?.lastPrice?.value && !isNaN(data?.lastPrice?.value)) {
+          setPrice(data?.lastPrice.value);
+        }
+        if (!!data?.metrics?.length) {
+          const percentageChange = data.metrics.find(
+            ({ label }) => label === METRIC_LABEL
+          ).percentageChange;
+          setPercentageChange(percentageChange);
+        }
+      } catch (e) {
+        console.log("Error parsing websocket data");
+      }
+    });
+    socket.on("connect_error", (err) => {
+      console.error("Connection error:", err.message);
+    });
+    socket.on("disconnect", () => {
+      console.log("Disconnected");
+    });
+    return () => {
+      socket.disconnect();
+    };
   }, [cryptoId]);
 
   return (
     <TouchableOpacity onPress={onPress} style={styles.touchable}>
       <View style={styles.itemWrapper}>
-        {/* Left Side: Image & Name */}
         <View style={styles.leftWrapper}>
           {imageSrc ? (
             <Image

@@ -7,6 +7,7 @@ import {
   QueryParam,
   HttpCode,
   CurrentUser,
+  Param,
 } from "routing-controllers";
 
 import { HTTP_CODES } from "../config/constants";
@@ -29,9 +30,15 @@ export class AlertController {
     return this.alertService.get(page, limit);
   }
 
-  @Get("/users")
-  async getAlertsByCurrentLoggedUser(@CurrentUser() user: IUser) {
-    return this.alertService.getByUserId(user._id as Types.ObjectId);
+  @Get("/:cryptoCoinId/crypto-coins")
+  async getAlertsByCryptoCoinIdAndLoggedUser(
+    @Param("cryptoCoinId") cryptoCoinId: string,
+    @CurrentUser() user: IUser
+  ) {
+    return this.alertService.getByCryptoCoinIdAndLoggedUser(
+      user._id as Types.ObjectId,
+      new Types.ObjectId(String(cryptoCoinId))
+    );
   }
 
   @Post("/")
